@@ -1,16 +1,10 @@
 // KAGE engine sample script for JavaScript engine
 //
-// % js sample.js > result.svg (SpiderMonkey)
-// % java -jar js.jar sample.js > result.svg (Rhino)
+// % js -m sample.js > result.svg (SpiderMonkey)
+// % java -jar js.jar sample.js > result.svg (Rhino untested)
 
-load("2d.js");
-load("buhin.js");
-load("curve.js");
-load("kage.js");
-load("kagecd.js");
-load("kagedf.js");
-load("polygon.js");
-load("polygons.js");
+import { Kage } from "kage.js";
+import { Polygons } from "polygons.js";
 
 var kage = new Kage();
 var polygons = new Polygons();
