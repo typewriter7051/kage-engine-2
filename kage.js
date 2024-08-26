@@ -1,6 +1,6 @@
 import { Buhin } from "./buhin.js";
-import { Gothic } from "./gothic.js";
-import { Mincho } from "./mincho.js";
+import { Gothic } from "./fonts/gothic/gothic.js";
+import { Mincho } from "./fonts/mincho/mincho.js";
 import { STROKETYPE } from "./stroketype.js";
 import {getBoundingBox, stretch} from "./util.js";
 export const FONTTYPE = {

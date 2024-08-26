@@ -1,9 +1,12 @@
-import { FontCanvas } from "./fontcanvas.js";
-import { STROKETYPE, STARTTYPE, ENDTYPE } from "./stroketype.js";
-import { get_extended_dest, get_extended_dest_wrong } from "./util.js";
+import { FontCanvas } from "../../fontcanvas.js";
+import { Font } from "../../font.js";
+import { STROKETYPE, STARTTYPE, ENDTYPE } from "../../stroketype.js";
+import { get_extended_dest, get_extended_dest_wrong } from "../../util.js";
 
-export class Gothic {
+export class Gothic extends Font {
   constructor(size) {
+    super();
+
     this.kRate = 50;
     if (size == 1) {
       this.kWidth = 3;
@@ -15,6 +18,7 @@ export class Gothic {
       this.kMage = 10;
     }
   }
+
   getPolygons(glyphData) {
     var cv = new FontCanvas();
     for (let glyph of glyphData) {
@@ -22,7 +26,8 @@ export class Gothic {
     }
     return cv.getPolygons();
   }
-  drawStroke(cv, s){ // gothic
+
+  drawStroke(cv, s) { // gothic
 
     const a1 = s[0];
     const a2 = s[1];

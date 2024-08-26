@@ -1,12 +1,15 @@
-import { FontCanvas } from "./fontcanvas.js";
-import { norm2, get_dir, get_rad, rad_to_dir, moved_point, get_extended_dest , widfun, widfun_d, widfun_stop, widfun_stop_d, widfun_fat, widfun_fat_d, DIR_POSX, DIR_NEGX, bezier_to_y, bezier_to_line, CURVE_THIN} from "./util.js";
-import { STROKETYPE, STARTTYPE, ENDTYPE } from "./stroketype.js";
-import { Bezier } from "./bezier.js";
-import { Polygon } from "./polygon.js";
-import { isCrossBoxWithOthers,isCrossWithOthers } from "./2d.js";
+import { FontCanvas } from "../../fontcanvas.js";
+import { Font } from "../../font.js";
+import { norm2, get_dir, get_rad, rad_to_dir, moved_point, get_extended_dest , widfun, widfun_d, widfun_stop, widfun_stop_d, widfun_fat, widfun_fat_d, DIR_POSX, DIR_NEGX, bezier_to_y, bezier_to_line, CURVE_THIN } from "../../util.js";
+import { STROKETYPE, STARTTYPE, ENDTYPE } from "../../stroketype.js";
+import { Bezier } from "../../bezier.js";
+import { Polygon } from "../../polygon.js";
+import { isCrossBoxWithOthers,isCrossWithOthers } from "../../2d.js";
 
-export class Mincho {
+export class Mincho extends Font {
   constructor(size) {
+    super();
+
     //if (!size) size=2.3;
     this.kRate = 50;
     if (size == 1) {
