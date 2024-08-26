@@ -1,9 +1,10 @@
 import { FontCanvas } from "./fontcanvas.js";
 import { norm2, get_dir, get_rad, rad_to_dir, moved_point, get_extended_dest , widfun, widfun_d, widfun_stop, widfun_stop_d, widfun_fat, widfun_fat_d, DIR_POSX, DIR_NEGX, bezier_to_y, bezier_to_line, CURVE_THIN} from "./util.js";
-import { STROKETYPE, STARTTYPE, ENDTYPE} from "./stroketype.js";
-import { Bezier} from "./bezier.js";
+import { STROKETYPE, STARTTYPE, ENDTYPE } from "./stroketype.js";
+import { Bezier } from "./bezier.js";
 import { Polygon } from "./polygon.js";
-import {isCrossBoxWithOthers,isCrossWithOthers} from "./2d.js";
+import { isCrossBoxWithOthers,isCrossWithOthers } from "./2d.js";
+
 export class Mincho {
   constructor(size) {
     //if (!size) size=2.3;
@@ -101,25 +102,25 @@ export class Mincho {
       this.kL2RDfatten = 1.1;
       this.kMage = 10;
       //size = "HAIR_LINE"
-      if (size == "HAIR_LINE"){//デバッグ用
+      if (size == "HAIR_LINE") {//デバッグ用
         this.kMinWidthY *= 0.3;
         this.kMinWidthYY *= 0.3;
         this.kMinWidthT *= 0.2;
-      } else if (size == "EXTRA_LIGHT"){
+      } else if (size == "EXTRA_LIGHT") {
         this.kMinWidthU *= 0.71;
         this.kMinWidthY *= 0.89;
         this.kMinWidthYY *= 0.85;
         this.kMinWidthT *= 0.76;
-      } else if (size == "LIGHT"){
+      } else if (size == "LIGHT") {
         this.kMinWidthU *= 0.85;
         this.kMinWidthY *= 0.94;
         this.kMinWidthYY *= 0.92;
         this.kMinWidthT *= 0.87;
-      } else if (size == "MEDIUM"){
+      } else if (size == "MEDIUM") {
         this.kMinWidthU *= 1.2;
         this.kMinWidthYY *= 1.1;
         this.kMinWidthT *= 1.15;
-      } else if (size == "DEMIBOLD"){//曲線に課題あり
+      } else if (size == "DEMIBOLD") {//曲線に課題あり
         this.kMinWidthU *= 1.44;
         this.kMinWidthYY *= 1.21;
         this.kMinWidthT *= 1.34;
@@ -154,6 +155,7 @@ export class Mincho {
     }
     return cv.getPolygons();
   }
+
   getPolygonsSeparated(strokesArrays) {
     return strokesArrays.map((glyphData, index) => {
       const cp = strokesArrays.slice();
@@ -169,6 +171,7 @@ export class Mincho {
       return cv.getPolygons();
     });
   }
+
   drawAdjustedStroke(cv, s, others) {//draw stroke on the canvas
 
     const a1 = s[0] % 100;
@@ -182,10 +185,10 @@ export class Mincho {
     const y3 = s[8];
     const x4 = s[9];
     const y4 = s[10];
-    //if(a2>100){
+    //if(a2>100) {
     //  console.log("error: start type"+a2)
     //}
-    //if(a3>100){
+    //if(a3>100) {
     //  console.log("error: end type"+a3)
     //}
     const dir12 = get_dir(x2-x1, y2-y1);
@@ -211,14 +214,19 @@ export class Mincho {
       }
       case STROKETYPE.STRAIGHT: {
         const dir = get_dir(x2-x1, y2-y1);
-        if (a3 == ENDTYPE.CONNECTING_H) {//usually horizontal
+        if (a3 == ENDTYPE.CONNECTING_H) {// usually horizontal
+
           cv.drawLine(x1, y1, x2, y2, this.kMinWidthYY);
-        } else if (a3 == ENDTYPE.OPEN && Math.abs(y2 - y1) < x2 - x1) { //horizontal or gentle slope
+
+        } else if (a3 == ENDTYPE.OPEN && Math.abs(y2 - y1) < x2 - x1) { // horizontal or gentle slope
+
           const param_uroko = this.adjustUrokoParam(s, others);
           const param_uroko2 = this.adjustUroko2Param(s, others);
+
           cv.drawLine(x1, y1, x2, y2, this.kMinWidthYY);
+
           const urokoScale = (this.kMinWidthU / this.kMinWidthY - 1.0) / 4.0 + 1.0;
-          if (y1 == y2) {//horizontal
+          if (y1 == y2) { // horizontal
             const uroko_max = Math.floor(norm2(param_uroko, param_uroko2))
             //const uroko_max = param_uroko == 0 ? param_uroko2 : param_uroko 
             //↑元の実装だとadjustUrokoによる調整がかかったものはadjustUroko2を一切通らないのでそれ以上小さくならない。
@@ -233,7 +241,7 @@ export class Mincho {
           const kMinWidthT_m = this.kMinWidthT - param_tate / 2;
           //head
           let poly_start = this.getStartOfVLine(x1, y1, x2, y2, a2, kMinWidthT_m, cv);
-          if (a2 == STARTTYPE.CONNECTING_MANUAL){
+          if (a2 == STARTTYPE.CONNECTING_MANUAL) {
             var r = get_rad(x1-x3, y1-y3) - get_rad(x2-x1, y2-y1) - Math.PI/2;
             poly_start = this.getStartOfOffsetLine(x1, y1, dir, kMinWidthT_m, kMinWidthT_m * Math.tan(r), kMinWidthT_m * -Math.tan(r));
           }
@@ -345,7 +353,7 @@ export class Mincho {
       case STROKETYPE.CURVE: {
 
         //for CONNECTING_MANUAL stroke (very very tricky implementation)
-        if (a2 == STARTTYPE.CONNECTING_MANUAL){
+        if (a2 == STARTTYPE.CONNECTING_MANUAL) {
           s[0] = s[0]-1//CURVE -> STRAIGHT
           this.drawAdjustedStroke(cv, s, others)//treat as STRAIGHT line data
           return
@@ -392,10 +400,10 @@ export class Mincho {
             break;
           }
           default: {
-            if (a3 == ENDTYPE.OPEN){
+            if (a3 == ENDTYPE.OPEN) {
               if (a2 == STARTTYPE.THIN || a2 == STARTTYPE.ROOFED_THIN) {
                 cv.drawL2RSweepEnd(x3, y3, dir23, kMinWidthT_mod, this.kL2RDfatten);
-              }else if(a2 == STARTTYPE.CONNECT_THIN){
+              } else if(a2 == STARTTYPE.CONNECT_THIN) {
                 cv.drawL2RSweepEnd(x3, y3, dir23, kMinWidthT_mod, 1);
               }
             }
@@ -416,9 +424,9 @@ export class Mincho {
         const kMinWidthT_mage = this.kMinWidthT - param_mage / 2;
 
         var rate;
-        if (a1 == STROKETYPE.BENDING){
+        if (a1 == STROKETYPE.BENDING) {
           rate=1
-        }else{//BENDING_ROUND
+        } else {//BENDING_ROUND
           rate = 6;
           if ((x3 - x2) * (x3 - x2) + (y3 - y2) * (y3 - y2) < 14400) { // smaller than 120 x 120
             rate = Math.sqrt((x3 - x2) * (x3 - x2) + (y3 - y2) * (y3 - y2)) / 120 * 6;
@@ -514,9 +522,9 @@ export class Mincho {
             break;
           case ENDTYPE.STOP:
             let [x4ex, y4ex] = moved_point(x4, y4, dir34, -kMinWidthT_mod * 0.52);
-            if(a2 == STARTTYPE.THIN || a2 == STARTTYPE.ROOFED_THIN){
+            if(a2 == STARTTYPE.THIN || a2 == STARTTYPE.ROOFED_THIN) {
               cv.drawTailCircle_tan(x4ex, y4ex, dir34, kMinWidthT_mod*1.1, tan1, tan2);
-            }else{//CONNECT_THIN
+            } else {//CONNECT_THIN
               cv.drawTailCircle(x4ex, y4ex, dir34, kMinWidthT_mod);
             }
             break;
@@ -592,13 +600,13 @@ export class Mincho {
     let [x2, y2] = get_extended_dest(x2pre, y2pre, sx, sy, delta);
 
     var cornerOffset = 0;
-    if((a1 == STARTTYPE.UPPER_RIGHT_CORNER || a1 == STARTTYPE.ROOFED_THIN) && a2 == ENDTYPE.LEFT_SWEEP){
+    if((a1 == STARTTYPE.UPPER_RIGHT_CORNER || a1 == STARTTYPE.ROOFED_THIN) && a2 == ENDTYPE.LEFT_SWEEP) {
       var sx1 = sx; var sx2 = sx; var sy1 = sy; var sy2 = sy;//元の実装と名前を揃える
       function hypot() {
         return Math.sqrt(arguments[0] * arguments[0] + arguments[1] * arguments[1]);
       }
       var contourLength = hypot(sx1-x1, sy1-y1) + hypot(sx2-sx1, sy2-sy1) + hypot(x2-sx2, y2-sy2);
-      if (contourLength < 100){
+      if (contourLength < 100) {
         cornerOffset = (kMinWidthT_mod > 6) ? (kMinWidthT_mod - 6) * ((100 - contourLength) / 100) : 0;
         x1 += cornerOffset;
       }
@@ -650,10 +658,10 @@ export class Mincho {
       if (b2) { bez1[0] = b2.reverse(); }
     } else if (40 <=a1 && a1 <= 80) {
       var r = get_rad((x2pre - x1pre) * Math.pow(1.4, (a1%10) - 4.5), y2pre - y1pre)
-      if(a1 >= 50){
+      if(a1 >= 50) {
         r = -r
       }
-      if(a1 == 60){
+      if(a1 == 60) {
         r = Math.PI* 0.5 // vertical edge
       }
       let b1 = bezier_to_line(bez2[bez2.length - 1], x1, y1, r);
@@ -675,12 +683,12 @@ export class Mincho {
     }
     var poly = Bezier.bez_to_poly(bez1);
     poly.concat(Bezier.bez_to_poly(bez2));
-    if(a1==22){
+    if(a1==22) {
       poly.push(x1, y1);
     }
     cv.addPolygon(poly);
-    if(a2 == ENDTYPE.STOP){
-      if(a1 == STARTTYPE.THIN || a1 == STARTTYPE.ROOFED_THIN){
+    if(a2 == ENDTYPE.STOP) {
+      if(a1 == STARTTYPE.THIN || a1 == STARTTYPE.ROOFED_THIN) {
         const bez1e = bez1[bez1.length - 1][3];
       const bez1c2 = bez1[bez1.length - 1][2];
       const bez2s = bez2[0][0];
@@ -691,12 +699,12 @@ export class Mincho {
       const cent_y = (y1 + 4*sy + y2) / 6;
       var rad_end = get_dir(x2-cent_x, y2-cent_y);
        cv.drawTailCircle_tan(x2, y2, rad_end, kMinWidthT_mod*1.1*thin_stop_param, tan1, tan2);
-      }else{//CONNECT_THIN or others
+      } else {//CONNECT_THIN or others
         const enddir = get_dir(x2-sx, y2-sy);
         cv.drawTailCircle(x2, y2, enddir, kMinWidthT_mod* (1-end_width_factor));
       }
     }
-    if (a1 == STARTTYPE.CONNECT_THIN){
+    if (a1 == STARTTYPE.CONNECT_THIN) {
       var dir_to_start = get_dir(x1-sx, y1-sy);
       cv.drawTailCircle(x1, y1, dir_to_start, kMinWidthT_mod*CURVE_THIN);
     }
@@ -733,12 +741,12 @@ export class Mincho {
     let [x2, y2] = get_extended_dest(x2pre, y2pre, sx2, sy2, delta);
 
     var cornerOffset = 0;
-    if((a1 == STARTTYPE.UPPER_RIGHT_CORNER || a1 == STARTTYPE.ROOFED_THIN) && a2 == ENDTYPE.LEFT_SWEEP){
+    if((a1 == STARTTYPE.UPPER_RIGHT_CORNER || a1 == STARTTYPE.ROOFED_THIN) && a2 == ENDTYPE.LEFT_SWEEP) {
       function hypot() {
         return Math.sqrt(arguments[0] * arguments[0] + arguments[1] * arguments[1]);
       }
       var contourLength = hypot(sx1-x1, sy1-y1) + hypot(sx2-sx1, sy2-sy1) + hypot(x2-sx2, y2-sy2);
-      if (contourLength < 100){
+      if (contourLength < 100) {
         cornerOffset = (kMinWidthT_mod > 6) ? (kMinWidthT_mod - 6) * ((100 - contourLength) / 100) : 0;
         x1 += cornerOffset;
       }
@@ -795,7 +803,7 @@ export class Mincho {
     poly.concat(Bezier.bez_to_poly(bez2));
     cv.addPolygon(poly);
 
-    if (a1 == STARTTYPE.CONNECT_THIN){
+    if (a1 == STARTTYPE.CONNECT_THIN) {
       var dir_to_start = get_dir(x1-sx1, y1-sy1);
       cv.drawTailCircle(x1, y1, dir_to_start, kMinWidthT_mod*CURVE_THIN);
     }
@@ -1060,7 +1068,7 @@ export class Mincho {
         if ((other[0] == 1 && stroke[6] < other[4]) || (other[0] == 3 && stroke[6] < other[6])) //lines "above" the hane
         {
           res0_above.push(p);
-        }else{
+        } else {
           res0_below.push(p);
         }
       }

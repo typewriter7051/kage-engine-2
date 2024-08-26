@@ -1,15 +1,18 @@
 import { Polygons } from "./polygons.js";
 import { Polygon } from "./polygon.js";
 import { PointMaker } from "./pointmaker.js";
-import { Bezier} from "./bezier.js";
-import {vector_to_len, bez_cir, get_dir, DIR_POSY, rad_to_dir, get_extended_dest} from "./util.js";
+import { Bezier } from "./bezier.js";
+import { vector_to_len, bez_cir, get_dir, DIR_POSY, rad_to_dir, get_extended_dest } from "./util.js";
+
 export class FontCanvas {
   constructor() {
     this.polygons = new Polygons();
   }
+
   getPolygons() {
     return this.polygons;
   }
+
   addPolygon(poly) {
     this.polygons.push(poly);
   }
@@ -311,6 +314,26 @@ export class FontCanvas {
   
   drawTailCircle_tan(tailX, tailY, dir, r, tan1, tan2) {
     //draw a (semi)circle on the tail of the line to (tailX, tailY)
+    const inset = 0.01;
+    var poly = new Polygon();
+    const vec1 = vector_to_len(tan1, r*bez_cir*0.74);
+    const vec2 = vector_to_len(tan2, r*bez_cir*0.78);
+    let p = new PointMaker(tailX, tailY, dir, r);
+    let [x1, y1] = p.vec(-inset, -1);
+    let [x2, y2] = p.vec(-inset, 1);
+    poly.push(x1, y1);
+    poly.push(x1 + vec1[0], y1 + vec1[1], 2);
+    poly.push2(p.vec(0.94,-bez_cir*1.09), 2);
+    poly.push2(p.vec(0.94,0));
+    poly.push2(p.vec(0.94,+bez_cir*1.09), 2);
+    poly.push(x2 + vec2[0], y2 + vec2[1], 2);
+    poly.push(x2, y2);
+    poly.push2(p.vec(-inset,0));//fix_union
+    this.polygons.push(poly);
+  }
+  /*
+  drawTailCircle_tan(tailX, tailY, dir, r, tan1, tan2) {
+    //draw a (semi)circle on the tail of the line to (tailX, tailY)
     var poly = new Polygon();
     const vec1 = vector_to_len(tan1, r*bez_cir*0.74);
     const vec2 = vector_to_len(tan2, r*bez_cir*0.78);
@@ -327,6 +350,7 @@ export class FontCanvas {
     poly.push2(p.vec(-0.01,0));//fix_union
     this.polygons.push(poly);
   }
+  */
 
   drawTailCircle(tailX, tailY, dir, r) {
     //draw a (semi)circle on the tail of the line to (tailX, tailY)
