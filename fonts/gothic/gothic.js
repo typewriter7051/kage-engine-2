@@ -90,7 +90,7 @@ export class Gothic extends Font {
       }
       case STROKETYPE.BENDING: {
         let [tx1, ty1] = get_extended_dest(x2, y2, x1, y1, -this.kMage);
-          let [tx2, ty2] = get_extended_dest(x2, y2, x3, y3, -this.kMage);
+        let [tx2, ty2] = get_extended_dest(x2, y2, x3, y3, -this.kMage);
         
         if(a3 == ENDTYPE.TURN_UPWARDS) {
           const tx3 = x3 - this.kMage;

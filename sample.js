@@ -5,9 +5,12 @@
 
 import { Kage } from "kage.js";
 import { Polygons } from "polygons.js";
+import { Gothic2 } from "./fonts/gothic2/gothic2.js";
 
 var kage = new Kage();
 var polygons = new Polygons();
+
+kage.kFont = new Gothic2(5);
 
 //kage.kBuhin.push("u6f22", "99:150:0:9:12:73:200:u6c35-07:0:-10:50$99:0:0:54:10:190:199:u26c29-07");
 //kage.kBuhin.push("u6c35-07", "2:7:8:42:12:99:23:124:35$2:7:8:20:62:75:71:97:85$2:7:8:12:123:90:151:81:188$2:2:7:63:144:109:118:188:51");
