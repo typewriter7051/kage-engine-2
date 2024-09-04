@@ -25,23 +25,27 @@ export class Gothic2 extends Font {
    * Takes an array of stroke data and returns an array of polygons.
    */
   getPolygons(strokes) {
+    let stroke_objs = new Array();
+
+    for (let stroke of strokes)
+      stroke_objs.push(this.processStroke(stroke));
+
+    this.connectStrokes(stroke_objs);
+
+    let stroke_arr = new Array();
+    for (let stroke of stroke_objs)
+      stroke_arr.push(stroke.toPolygon());
+
+    return stroke_arr;
+  }
+
+  /**
+   * Handles connecting strokes together if needed.
+   */
+  connectStrokes(strokes) {
     //--------------------------------------------------------------------------
     // Helper functions.
     
-    function getStartPoint(stroke) {
-      return [stroke[3], stroke[4]];
-    }
-
-    function getEndPoint(stroke) {
-      if (stroke[0] == STROKETYPE.STRAIGHT)
-        return [stroke[5], stroke[6]];
-      else if (stroke[0] in [STROKETYPE.CURVE, STROKETYPE.BENDING,
-                             STROKETYPE.BENDING_ROUND])
-        return [stroke[7], stroke[8]];
-      else
-        return [stroke[9], stroke[10]];
-    }
-
     function pointsEqual(point1, point2) {
       if (point1[0] === point2[0] && point1[1] === point2[1])
         return true;
@@ -64,24 +68,16 @@ export class Gothic2 extends Font {
     }
 
     function haveConnection(stroke1, stroke2) {
-      let line1 = [getStartPoint(stroke1), getEndPoint(stroke1)];
-      let line2 = [getStartPoint(stroke2), getEndPoint(stroke2)];
+      //let line1 = [getStartPoint(stroke1), getEndPoint(stroke1)];
+      //let line2 = [getStartPoint(stroke2), getEndPoint(stroke2)];
+      let line1 = [stroke1.start_point, stroke1.end_point];
+      let line2 = [stroke2.start_point, stroke2.end_point];
 
       return anyPointsEqual(line1, line2);
     }
 
     //--------------------------------------------------------------------------
 
-    // Add stroke paths to canvas.
-    var cv = new FontCanvas();
-    var i = 0;
-    for (let stroke of strokes) {
-      this.processStroke(cv, stroke, i);
-      i += 1;
-    }
-
-    /*
-    // Fix stroke connections.
     for (let i = 0; i < strokes.length; i++) {
       if (strokes[i][1] != STARTTYPE.CONNECTING_H &&
           strokes[i][2] != ENDTYPE.CONNECTING_H) {
@@ -91,18 +87,16 @@ export class Gothic2 extends Font {
         if (j == i) continue;
         if (haveConnection(strokes[i], strokes[j])) {
           // TODO: continue here.
-          let connected_polygon = this.connectStrokes(strokes[i], strokes[j]);
+          //let connected_polygon = this.__connectStrokes(strokes[i], strokes[j]);
         }
       }
     }
-    */
-    return cv.getPolygons();
   }
 
   /**
-   * Processes the stroke data s into a polygon and adds it to canvas cv.
+   * Processes the stroke string data s into a polygon and returns a Stroke object.
    */
-  processStroke(cv, s, i) {
+  processStroke(s) {
     const a1 = s[0];
     const a2 = s[1];
     const a3 = s[2];
@@ -119,18 +113,8 @@ export class Gothic2 extends Font {
     var stroke = new Stroke(s);
 
     switch(a1 % 100) {
-      case 0: { // Transforms.
-        if (a2 == 98) {
-          cv.flip_left_right(x1, y1, x2, y2);
-        } else if (a2 == 97) {
-          cv.flip_up_down(x1, y1, x2, y2);
-        } else if (a2 == 99 && a3 == 1) {
-          cv.rotate90(x1, y1, x2, y2);
-        } else if (a2 == 99 && a3 == 2) {
-          cv.rotate180(x1, y1, x2, y2);
-        } else if (a2 == 99 && a3 == 3) {
-          cv.rotate270(x1, y1, x2, y2);
-        }
+      // This font doesn't support trasnformations, so we just leave this here.
+      case 0: {
         break;
       }
       case STROKETYPE.STRAIGHT: {
@@ -184,7 +168,7 @@ export class Gothic2 extends Font {
         break;
     }
 
-    cv.addPolygon(stroke.toPolygon());
+    return stroke;
   }
 
   //============================================================================
@@ -452,7 +436,7 @@ export class Gothic2 extends Font {
    * Takes two strokes that are assumed to be connected and merges their paths,
    * returning a new connected stroke.
    */
-  connectStrokes(stroke1, stroke2) {
+  __connectStrokes(stroke1, stroke2) {
     //--------------------------------------------------------------------------
     // Helper functions.
     
@@ -637,54 +621,5 @@ export class Gothic2 extends Font {
     );
 
     return connected_stroke;
-  }
-  
-  //----------------------------------------------------------------------------
-  // Misc (to delete).
-
-  gothicDrawCurve(x1, y1, x2, y2, x3, y3, ta1, ta2, cv) {
-    // XXX ta1 and ta2 are unused here, was this intentional?
-    var a1, a2;
-    if (a1 % 10 == 2) {
-      let [x1ext, y1ext] = get_extended_dest_wrong(x1, y1, x2, y2, this.kWidth);
-      x1 = x1ext; y1 = y1ext;
-    } else if (a1 % 10 == 3) {
-      let [x1ext, y1ext] = get_extended_dest_wrong(x1, y1, x2, y2, this.kWidth * this.kKakato);
-      x1 = x1ext; y1 = y1ext;
-    }
-    if (a2 % 10 == 2) {
-      let [x2ext, y2ext] = get_extended_dest_wrong(x3, y3, x2, y2, this.kWidth);
-      x3 = x2ext; y3 = y2ext;
-    } else if (a2 % 10 == 3) {
-      let [x2ext, y2ext] = get_extended_dest_wrong(x3, y3, x2, y2, this.kWidth * this.kKakato);
-      x3 = x2ext; y3 = y2ext;
-    }
-    cv.drawQBezier(x1, y1, x2, y2, x3, y3, (t) => { return this.kWidth; }, t => 0, 1000 / this.kRate);
-  }
-
-  gothicDrawLine(tx1, ty1, tx2, ty2, ta2, ta3, cv) {
-    var x1 = tx1;
-    var y1 = ty1;
-    var x2 = tx2;
-    var y2 = ty2;
-    // STARTTYPE: CONNECTING_H, UPPER_LEFT_CORNER, UPPER_RIGHT_CORNER, CONNECTING_V.
-    if (ta2 % 10 == 2) {
-      let [x1ext, y1ext] = get_extended_dest(tx1, ty1, tx2, ty2, this.kWidth);
-      x1 = x1ext; y1 = y1ext;
-    // XXX Which start types end with 3?
-    } else if (ta2 % 10 == 3) {
-      let [x1ext, y1ext] = get_extended_dest(tx1, ty1, tx2, ty2, this.kWidth * this.kKakato);
-      x1 = x1ext; y1 = y1ext;
-    }
-    // ENDTYPE: CONNECTING_H, CONNECTING_V.
-    if (ta3 % 10 == 2) {
-      let [x2ext, y2ext] = get_extended_dest(tx2, ty2, tx1, ty1, this.kWidth);
-      x2 = x2ext; y2 = y2ext;
-    // ENDTYPE: LOWER_LEFT_CORNER, LOWER_RIGHT_CORNER, LOWER_LEFT_ZH_OLD, LOWER_LEFT_ZH_NEW.
-    } else if (ta3 % 10 == 3) {
-      let [x2ext, y2ext] = get_extended_dest(tx2, ty2, tx1, ty1, this.kWidth * this.kKakato);
-      x2 = x2ext; y2 = y2ext;
-    }
-    cv.drawLine(x1, y1, x2, y2, this.kWidth);
   }
 }
