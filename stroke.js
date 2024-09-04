@@ -1,5 +1,6 @@
 import { Polygon } from "./polygon.js";
 import { PointMaker } from "./pointmaker.js";
+import { STROKETYPE } from "./stroketype.js";
 
 /**
  * Instead of drawing the stroke head, body, and tail separately this class
@@ -14,7 +15,24 @@ import { PointMaker } from "./pointmaker.js";
  * together.
  */
 export class Stroke {
-  constructor() {
+  constructor(stroke) {
+    // Store the start and endpoints for connection purposes.
+    if (typeof stroke != "undefined" && stroke != null) {
+      this.start_point = [stroke[3], stroke[4]];
+      if (stroke[0] == STROKETYPE.STRAIGHT)
+        this.end_point = [stroke[5], stroke[6]];
+      else if (stroke[0] == STROKETYPE.CURVE ||
+               stroke[0] == STROKETYPE.BENDING ||
+               stroke[0] == STROKETYPE.BENDING_ROUND)
+        this.end_point = [stroke[7], stroke[8]];
+      else
+        this.end_point = [stroke[9], stroke[10]];
+    }
+    else {
+      this.start_point = [0, 0];
+      this.end_point   = [0, 0];
+    }
+
     this.head  = new Array();
     // Since the stroke body path is open on both ends we have to store
     // each side separately.
@@ -31,16 +49,18 @@ export class Stroke {
   toPolygon() {
     let polygon = new Polygon();
 
-    // Get rid of empty paths.
-    let to_merge = new Array();
-    let paths = [this.head, this.body1, this.tail, this.body2];
-    for (let i = 0; i < paths.length; i++) {
-      if (paths[i].length != 0) {
-        to_merge.push(paths[i]);
-      }
+    if (this.head.length == 0) {
+      this.head.push(this.body2[this.body2.length - 1]);
+      this.head.push(this.body1[0]);
+    }
+    if (this.tail.length == 0) {
+      this.tail.push(this.body1[this.body1.length - 1]);
+      this.tail.push(this.body2[0]);
     }
 
-    let merged_path = Stroke.mergePaths(to_merge);
+    let merged_path = Stroke.mergePaths(
+      [this.head, this.body1, this.tail, this.body2]
+    );
 
     for (let i = 0; i < merged_path.length; i++) {
       let point = merged_path[i];

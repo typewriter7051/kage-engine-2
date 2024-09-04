@@ -151,8 +151,14 @@ function calc_hosomi(x1, y1, x2, y2) {
   return hosomi;
 }
 
+/**
+ * New version returns value between 0 and 2pi.
+ */
 export function get_rad(x, y) {
-  return Math.atan2(y,x);
+  let rad = Math.atan2(y, x);
+  if (rad < 0) rad += 2 * Math.PI;
+  return rad;
+  /*
   var rad;
   if (x == 0) {
     if (y > 0) {
@@ -165,6 +171,7 @@ export function get_rad(x, y) {
     if (x < 0) { rad += Math.PI }
   }
   return rad;
+  */
 }
 
 export function rad_to_vector(rad) {
