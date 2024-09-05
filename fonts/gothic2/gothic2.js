@@ -1,4 +1,5 @@
 import { FontCanvas } from "../../fontcanvas.js";
+import { Polygons } from "../../polygons.js";
 import { Font } from "../../font.js";
 import { STROKETYPE, STARTTYPE, ENDTYPE } from "../../stroketype.js";
 import { get_dir, get_rad, rad_to_dir, moved_point, get_extended_dest } from "../../util.js";
@@ -32,11 +33,11 @@ export class Gothic2 extends Font {
 
     this.connectStrokes(stroke_objs);
 
-    let stroke_arr = new Array();
+    let polygons = new Polygons();
     for (let stroke of stroke_objs)
-      stroke_arr.push(stroke.toPolygon());
+      polygons.push(stroke.toPolygon());
 
-    return stroke_arr;
+    return polygons;
   }
 
   /**
@@ -79,15 +80,16 @@ export class Gothic2 extends Font {
     //--------------------------------------------------------------------------
 
     for (let i = 0; i < strokes.length; i++) {
-      if (strokes[i][1] != STARTTYPE.CONNECTING_H &&
-          strokes[i][2] != ENDTYPE.CONNECTING_H) {
+      if (strokes[i].s[1] != STARTTYPE.CONNECTING_H &&
+          strokes[i].s[2] != ENDTYPE.CONNECTING_H) {
         continue;
       }
       for (let j = 0; j < strokes.length; j++) {
         if (j == i) continue;
         if (haveConnection(strokes[i], strokes[j])) {
-          // TODO: continue here.
-          //let connected_polygon = this.__connectStrokes(strokes[i], strokes[j]);
+          let connected_polygon = this.__connectStrokes(strokes[i], strokes[j]);
+          strokes.splice(j, 1);
+          strokes[i] = connected_polygon;
         }
       }
     }
@@ -458,11 +460,25 @@ export class Gothic2 extends Font {
         return stroke.body2[0];
     }
 
+    function setEndpointLeft(stroke, head_connected, point) {
+      if (head_connected)
+        stroke.body1[0] = point;
+      else
+        stroke.body2[0] = point;
+    }
+
     function getEndpointRight(stroke, head_connected) {
       if (head_connected)
         return stroke.body2[stroke.body2.length - 1];
       else
         return stroke.body1[stroke.body1.length - 1];
+    }
+
+    function setEndpointRight(stroke, head_connected, point) {
+      if (head_connected)
+        stroke.body2[stroke.body2.length - 1] = point;
+      else
+        stroke.body1[stroke.body1.length - 1] = point;
     }
 
     function getDirLeft(stroke, head_connected) {
@@ -481,15 +497,16 @@ export class Gothic2 extends Font {
                                 stroke.body1[stroke.body1.length - 2]);
     }
 
-    function getBodyFirst(stroke, head_connected) {
-      if (head_connected)
-        return stroke.body2;
-      else
-        return stroke.body1;
-    }
+    function getBody(stroke, head_connected, first_stroke, left) {
+      let new_left = left;
 
-    function getBodySecond(stroke, head_connected) {
       if (head_connected)
+        new_left = !new_left;
+
+      if (!first_stroke)
+        new_left = !new_left;
+
+      if (new_left)
         return stroke.body1;
       else
         return stroke.body2;
@@ -524,6 +541,7 @@ export class Gothic2 extends Font {
 
       let point = new Object();
       point.off = 0;
+      point.p = new Array();
       let parallel = false;
 
       if (d2.x != 0) {
@@ -534,8 +552,8 @@ export class Gothic2 extends Font {
           parallel = true;
         }
         const alpha = numerator / denominator;
-        point.x = p1.x + alpha * d1.x;
-        point.y = p1.y + alpha * d1.y;
+        point.p[0] = p1.x + alpha * d1.x;
+        point.p[1] = p1.y + alpha * d1.y;
       }
       else if (d1.x != 0) {
         const d = d1.y / d1.x;
@@ -544,16 +562,16 @@ export class Gothic2 extends Font {
         if (denominator == 0) {
           parallel = true;
         }
-        const beta = numerator / denominaotr;
-        point.x = p2.x + beta * d2.x;
-        point.y = p2.y + beta * d2.y;
+        const beta = numerator / denominator;
+        point.p[0] = p2.x + beta * d2.x;
+        point.p[1] = p2.y + beta * d2.y;
       }
       else {
         parallel = true;
       }
       if (parallel) {
-        point.x = (p1.x + p2.x) * 0.5;
-        point.y = (p1.y + p2.y) * 0.5;
+        point.p[0] = (p1.x + p2.x) * 0.5;
+        point.p[1] = (p1.y + p2.y) * 0.5;
       }
 
       return point;
@@ -595,30 +613,25 @@ export class Gothic2 extends Font {
     let intersection2 = calculateIntersection(ray2l, ray1r);
 
     // Move end points and merge.
-    let p = new Object();
-    p = getEndpointLeft(stroke1, head_connected1);
-    p = intersection1;
-    p = getEndpointRight(stroke2, head_connected2);
-    p = intersection1;
-    p = getEndpointLeft(stroke2, head_connected2);
-    p = intersection2;
-    p = getEndpointRight(stroke1, head_connected1);
-    p = intersection2;
+    setEndpointLeft(stroke1, head_connected1, intersection1);
+    setEndpointRight(stroke2, head_connected2, intersection1);
+    setEndpointLeft(stroke2, head_connected2, intersection2);
+    setEndpointRight(stroke1, head_connected1, intersection2);
 
     let connected_stroke = new Stroke(null);
     connected_stroke.start_point = stroke1.start_point;
     connected_stroke.end_point = stroke2.end_point;
 
     connected_stroke.head = getEnd(stroke1, head_connected1);
-    connected_stroke.body1 = Stroke.mergePaths(
-      getBodyFirst(stroke1, head_connected1),
-      getBodyFirst(stroke2, head_connected2)
-    );
+    connected_stroke.body1 = Stroke.mergePaths([
+      getBody(stroke1, head_connected1, true, true),
+      getBody(stroke2, head_connected2, false, true)
+    ]);
     connected_stroke.tail = getEnd(stroke2, head_connected2);
-    connected_stroke.body2 = Stroke.mergePaths(
-      getBodySecond(stroke2, head_connected2),
-      getBodySecond(stroke1, head_connected1)
-    );
+    connected_stroke.body2 = Stroke.mergePaths([
+      getBody(stroke2, head_connected2, false, false),
+      getBody(stroke1, head_connected1, true, false)
+    ]);
 
     return connected_stroke;
   }

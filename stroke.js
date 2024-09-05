@@ -16,6 +16,8 @@ import { STROKETYPE } from "./stroketype.js";
  */
 export class Stroke {
   constructor(stroke) {
+    this.s = stroke;
+
     // Store the start and endpoints for connection purposes.
     if (typeof stroke != "undefined" && stroke != null) {
       this.start_point = [stroke[3], stroke[4]];
