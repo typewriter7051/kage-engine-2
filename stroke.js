@@ -46,9 +46,10 @@ export class Stroke {
   /**
    * Takes the stored paths and returns the entire stroke as a single path.
    *
+   * @param precision is the number of decimal places to round to.
    * @return Polygon object containing the stroke.
    */
-  toPolygon() {
+  toPolygon(precision) {
     let polygon = new Polygon();
 
     if (this.head.length == 0) {
@@ -67,6 +68,11 @@ export class Stroke {
     for (let i = 0; i < merged_path.length; i++) {
       let point = merged_path[i];
       polygon.push(point.p[0], point.p[1], point.off);
+    }
+
+    for (let point of polygon.array) {
+      point.x = parseFloat(point.x.toFixed(precision));
+      point.y = parseFloat(point.y.toFixed(precision));
     }
 
     return polygon;

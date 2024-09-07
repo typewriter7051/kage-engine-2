@@ -2,32 +2,36 @@ import { Buhin } from "./buhin.js";
 import { Gothic } from "./fonts/gothic/gothic.js";
 import { Mincho } from "./fonts/mincho/mincho.js";
 import { STROKETYPE } from "./stroketype.js";
-import {getBoundingBox, stretch} from "./util.js";
+import { getBoundingBox, stretch } from "./util.js";
+
 export const FONTTYPE = {
   MINCHO: 0,
   GOTHIC: 1,
 }
+
 export const KShotai = {
     kMincho: 0,
     kGothic: 1
 }
+
 export class Kage {
-  constructor(type, size){
+  constructor(type, size, precision) {
     this.kBuhin = new Buhin();
     this.setFont(type,size);
     this.kRate = 100;
+    this.precision = 5;
   }
-  setFont(type, size){
-    switch(type){
-     case FONTTYPE.GOTHIC:{
+  setFont(type, size) {
+    switch(type) {
+     case FONTTYPE.GOTHIC: {
         this.kFont = new Gothic(size);
         break;
       }
-      case FONTTYPE.MINCHO:{
+      case FONTTYPE.MINCHO: {
         this.kFont = new Mincho(size);
         break;
       }
-      default:{
+      default: {
         this.kFont = new Mincho(size);
         break;
       }

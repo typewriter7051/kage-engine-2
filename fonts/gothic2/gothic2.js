@@ -11,15 +11,13 @@ export class Gothic2 extends Font {
     super();
 
     /**
-     * kRate is unknown.
      * kWidth determines the stroke (line/curve) width.
-     * kKakato is unknown.
      * kMage determines the turn size, used for hooks and bends.
      */
-    this.kRate = 50;
     this.kWidth = size;
-    this.kKakato = size * 0.6;
     this.kMage = 10 + size * 0.5;
+
+    this.precision = 2;
   }
 
   /**
@@ -35,7 +33,7 @@ export class Gothic2 extends Font {
 
     let polygons = new Polygons();
     for (let stroke of stroke_objs)
-      polygons.push(stroke.toPolygon());
+      polygons.push(stroke.toPolygon(this.precision));
 
     return polygons;
   }
@@ -69,8 +67,6 @@ export class Gothic2 extends Font {
     }
 
     function haveConnection(stroke1, stroke2) {
-      //let line1 = [getStartPoint(stroke1), getEndPoint(stroke1)];
-      //let line2 = [getStartPoint(stroke2), getEndPoint(stroke2)];
       let line1 = [stroke1.start_point, stroke1.end_point];
       let line2 = [stroke2.start_point, stroke2.end_point];
 
@@ -80,16 +76,20 @@ export class Gothic2 extends Font {
     //--------------------------------------------------------------------------
 
     for (let i = 0; i < strokes.length; i++) {
-      if (strokes[i].s[1] != STARTTYPE.CONNECTING_H &&
-          strokes[i].s[2] != ENDTYPE.CONNECTING_H) {
+      if (strokes[i].s[1] % 10 != 2 &&
+          strokes[i].s[2] % 10 != 3 &&
+          strokes[i].s[2] != ENDTYPE.CONNECTING_H &&
+          strokes[i].s[2] != ENDTYPE.CONNECTING_V) {
         continue;
       }
       for (let j = 0; j < strokes.length; j++) {
         if (j == i) continue;
         if (haveConnection(strokes[i], strokes[j])) {
           let connected_polygon = this.__connectStrokes(strokes[i], strokes[j]);
-          strokes.splice(j, 1);
           strokes[i] = connected_polygon;
+          strokes.splice(j, 1);
+          j--;
+          if (i > j) i--;
         }
       }
     }
@@ -99,6 +99,11 @@ export class Gothic2 extends Font {
    * Processes the stroke string data s into a polygon and returns a Stroke object.
    */
   processStroke(s) {
+    // Move the endpoint down if the stroke end is a bottom corner.
+    if (s[0] % 100 == STROKETYPE.STRAIGHT && s[2] % 10 == 3) {
+      s[6] += this.kWidth * 0.5 + 10;
+    }
+
     const a1 = s[0];
     const a2 = s[1];
     const a3 = s[2];
@@ -132,7 +137,7 @@ export class Gothic2 extends Font {
         this.setBodyCurve(stroke, x1, y1, x2, y2, x3, y3);
         let dir23 = get_dir(x3 - x2, y3 - y2);
         if(a3 == ENDTYPE.TURN_LEFT) {
-          this.setTailTurnLeft(stroke, dir23);
+          this.setTailHookLeft(stroke, dir23);
         }
         else if(a3 == ENDTYPE.TURN_UPWARDS){
           this.setTailTurnUpwards(stroke, dir23);
@@ -619,8 +624,14 @@ export class Gothic2 extends Font {
     setEndpointRight(stroke1, head_connected1, intersection2);
 
     let connected_stroke = new Stroke(null);
-    connected_stroke.start_point = stroke1.start_point;
-    connected_stroke.end_point = stroke2.end_point;
+    if (head_connected1)
+      connected_stroke.start_point = stroke1.end_point;
+    else 
+      connected_stroke.start_point = stroke1.start_point;
+    if (head_connected2)
+      connected_stroke.end_point = stroke2.end_point;
+    else
+      connected_stroke.end_point = stroke2.start_point;
 
     connected_stroke.head = getEnd(stroke1, head_connected1);
     connected_stroke.body1 = Stroke.mergePaths([
