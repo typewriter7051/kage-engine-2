@@ -10,8 +10,8 @@ export const FONTTYPE = {
 }
 
 export const KShotai = {
-    kMincho: 0,
-    kGothic: 1
+  kMincho: 0,
+  kGothic: 1
 }
 
 export class Kage {
@@ -23,7 +23,7 @@ export class Kage {
   }
   setFont(type, size) {
     switch(type) {
-     case FONTTYPE.GOTHIC: {
+      case FONTTYPE.GOTHIC: {
         this.kFont = new Gothic(size);
         break;
       }
@@ -42,8 +42,8 @@ export class Kage {
     this.makeGlyph2(polygons, glyphData);
   }
   makeGlyph2(polygons, data) {
-      var kageStrokes = this.getStrokes(data);
-      polygons.concat(this.kFont.getPolygons(kageStrokes));
+    var kageStrokes = this.getStrokes(data);
+    polygons.concat(this.kFont.getPolygons(kageStrokes));
   }
   makeGlyph3(data) { // void
     var kageStrokes = this.getStrokes(data);
@@ -51,16 +51,16 @@ export class Kage {
   }
 
   makeGlyphSeparated2(data) {
-		const strokesArrays = data.map((subdata) => this.getStrokes(subdata));
-		return strokesArrays.map((strokesArray) => {
-			const result = this.kFont.getPolygons(strokesArray)
-			return result;
-		});
+    const strokesArrays = data.map((subdata) => this.getStrokes(subdata));
+    return strokesArrays.map((strokesArray) => {
+      const result = this.kFont.getPolygons(strokesArray)
+      return result;
+    });
   }
   makeGlyphSeparated(data) {
     const strokesArrays = data.map((subdata) => this.getStrokes(subdata));
     return this.kFont.getPolygonsSeparated(strokesArrays);
-	}
+  }
   getStrokes(glyphData) { // strokes array
     var strokes = new Array();
     var textData = glyphData.split("$");
@@ -126,17 +126,17 @@ export class Kage {
         }
       }
       result.push([temp[i][0],
-      temp[i][1],
-      temp[i][2],
-      x1 + temp[i][3] * (x2 - x1) / 200,
-      y1 + temp[i][4] * (y2 - y1) / 200,
-      x1 + temp[i][5] * (x2 - x1) / 200,
-      y1 + temp[i][6] * (y2 - y1) / 200,
-      x1 + temp[i][7] * (x2 - x1) / 200,
-      y1 + temp[i][8] * (y2 - y1) / 200,
-      x1 + temp[i][9] * (x2 - x1) / 200,
-      y1 + temp[i][10] * (y2 - y1) / 200]);
-      
+        temp[i][1],
+        temp[i][2],
+        x1 + temp[i][3] * (x2 - x1) / 200,
+        y1 + temp[i][4] * (y2 - y1) / 200,
+        x1 + temp[i][5] * (x2 - x1) / 200,
+        y1 + temp[i][6] * (y2 - y1) / 200,
+        x1 + temp[i][7] * (x2 - x1) / 200,
+        y1 + temp[i][8] * (y2 - y1) / 200,
+        x1 + temp[i][9] * (x2 - x1) / 200,
+        y1 + temp[i][10] * (y2 - y1) / 200]);
+
     }
     return result;
   }
@@ -147,18 +147,18 @@ export class Kage {
     ss.map(s=>{
       s.a1_opt = Math.floor(s[0] / 100);
       s.a1_100 = s[0]%100;
-  
+
       s.a2_opt = Math.floor(s[1] / 100);
       s.a2_100 = s[1]%100;
       s.a2_opt_1 = s.a2_opt % 10;
       s.a2_opt_2 = Math.floor(s.a2_opt / 10) % 10;
       s.a2_opt_3 = Math.floor(s.a2_opt / 100);
-  
+
       s.a3_opt = Math.floor(s[2] / 100);
       s.a3_100 = s[2]%100;
       s.a3_opt_1 = s.a3_opt % 10;
       s.a3_opt_2 = Math.floor(s.a3_opt / 10);
-  
+
       s.x1=s[3];
       s.y1=s[4];
       s.x2=s[5];
@@ -168,7 +168,7 @@ export class Kage {
       s.x4=s[9];
       s.y4=s[10];
     })
-    
+
     return ss;
   }
   getBox(strokes){
