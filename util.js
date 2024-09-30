@@ -2,67 +2,67 @@ export const bez_cir = 4*(Math.sqrt(2)-1)/3;
 //a constant for drawing circles with Bezier curves
 export const CURVE_THIN = 0.1910
 //width functions (using the first quadrant of circle of radius p, centered at (1-p, 1-p) )
-export function norm2(x, y){
+export function norm2(x, y) {
   return Math.sqrt(x*x + y*y)
 }
 
-export function widfun(t, x1, y1, x2, y2, wid){
+export function widfun(t, x1, y1, x2, y2, wid) {
   const len = Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
   const p = 1 + Math.sqrt(100/len);
   return (  (Math.sqrt(p*p+(p-1)*(p-1)-(p-t)*(p-t))-(p-1))*(1-CURVE_THIN)+CURVE_THIN  )*wid;
 }
 
-export function widfun_d(t, x1, y1, x2, y2, wid){
+export function widfun_d(t, x1, y1, x2, y2, wid) {
   const len = Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
   const p = 1 + Math.sqrt(100/len);
   return wid*(1-CURVE_THIN)*0.5*2*(p-t) / Math.sqrt(p*p+(p-1)*(p-1)-(p-t)*(p-t));
 }
 
-export function widfun_stop(t, x1, y1, x2, y2, wid){
+export function widfun_stop(t, x1, y1, x2, y2, wid) {
   const len = Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
   const p = 1 + Math.sqrt(100/len);
   return (  (Math.sqrt(p*p+(p-1)*(p-1)-(p-t)*(p-t))-(p-1))*(1.10-CURVE_THIN)+CURVE_THIN  )*wid;
 }
 
-export function widfun_stop_d(t, x1, y1, x2, y2, wid){
+export function widfun_stop_d(t, x1, y1, x2, y2, wid) {
   const len = Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
   const p = 1 + Math.sqrt(100/len);
   return wid*(1.10-CURVE_THIN)*0.5*2*(p-t) / Math.sqrt(p*p+(p-1)*(p-1)-(p-t)*(p-t));
 }
-export function widfun_stop2(t, x1, y1, x2, y2, wid){
+export function widfun_stop2(t, x1, y1, x2, y2, wid) {
   const len = Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
   const p = 1 + Math.sqrt(100/len);
   return (  (1-Math.pow(1-t, 1.21))*(1.10-CURVE_THIN)+CURVE_THIN  )*wid;
 }
 
-export function widfun_stop2_d(t, x1, y1, x2, y2, wid){
+export function widfun_stop2_d(t, x1, y1, x2, y2, wid) {
   const len = Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
   const p = 1 + Math.sqrt(100/len);
   return wid*(1.10-CURVE_THIN)*(1* 1.21) * Math.pow(1-t,0.21);
 }
 
 //fat version (used in cubic bezier)
-export function widfun_fat(t, x1, y1, x2, y2, wid){
+export function widfun_fat(t, x1, y1, x2, y2, wid) {
   const len = Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
   const p = 1+ Math.sqrt(40/len);
   return (  (Math.sqrt(p*p + (p-1)*(p-1) - (p-t)*(p-t)) - (p-1)  )*(1-CURVE_THIN)+CURVE_THIN  )*wid;
 }
 
-export function widfun_fat_d(t, x1, y1, x2, y2, wid){
+export function widfun_fat_d(t, x1, y1, x2, y2, wid) {
   const len = Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
   const p = 1+ Math.sqrt(40/len);
   return wid*(1-CURVE_THIN)*0.5*2*(p-t) / Math.sqrt(p*p + (p-1)*(p-1) - (p-t)*(p-t));
 }
 
-export function get_dir(x, y){
-  if (y==0){
-    if(x<0){
+export function get_dir(x, y) {
+  if (y==0) {
+    if(x<0) {
       return {sin: 0, cos: -1};
     }else{
       return {sin: 0, cos:  1};
     }
-  }else if(x==0){
-    if(y<0){
+  }else if(x==0) {
+    if(y<0) {
       return {sin: -1, cos: 0};
     }else{
       return {sin:  1, cos: 0};
@@ -77,7 +77,7 @@ export const DIR_POSY = {sin: 1, cos: 0};
 export const DIR_NEGX = {sin: 0, cos: -1};
 export const DIR_NEGY = {sin: -1, cos: 0};
 
-export function moved_point(x, y, dir, delta){
+export function moved_point(x, y, dir, delta) {
   return [x + delta*dir.cos, y + delta*dir.sin];
 }
 export function get_extended_dest(destX, destY, srcX, srcY, delta) {
@@ -133,12 +133,12 @@ export function unit_normal_vector(ix, iy) {//to the right(clockwise (in the dis
   return [ia, ib];
 }
 
-function normal_vector_of_len(v, l){//to the right(clockwise (in the display coordinate))
+function normal_vector_of_len(v, l) {//to the right(clockwise (in the display coordinate))
   const len=Math.sqrt(v[0]*v[0]+v[1]*v[1]);
   return [-v[1]*l/len,v[0]*l/len];
 }
 
-export function vector_to_len(v, l){
+export function vector_to_len(v, l) {
   const len=Math.sqrt(v[0]*v[0]+v[1]*v[1]);
   return [v[0]*l/len,v[1]*l/len];
 }
@@ -181,10 +181,11 @@ export function rad_to_vector(rad) {
 export function rad_to_dir(rad) {
   return {sin:  Math.sin(rad), cos: Math.cos(rad)};
 }
+
 /////////////////////////////////////////////////////
-export function bezier_to_line(bez, x0, y0, rad){
+export function bezier_to_line(bez, x0, y0, rad) {
   var rotate_mat_inv = [Math.cos(-rad), -Math.sin(-rad), Math.sin(-rad), Math.cos(-rad)]
-  function genten_rotate(p){
+  function genten_rotate(p) {
     let [x,y] = p
     var x1 = x-x0
     var y1 = y-y0
@@ -192,7 +193,7 @@ export function bezier_to_line(bez, x0, y0, rad){
   }
 
   var rotate_mat = [Math.cos(rad), -Math.sin(rad), Math.sin(rad), Math.cos(rad)]
-  function genten_rotate_inv(p){
+  function genten_rotate_inv(p) {
     let [x,y] = p
     return [rotate_mat[0]*x+rotate_mat[1]*y + x0, rotate_mat[2]*x+rotate_mat[3]*y + y0]
   }
@@ -203,7 +204,8 @@ export function bezier_to_line(bez, x0, y0, rad){
   bez_edited_return[0] = bez[0] //始点は変わらないはずなので誤差を防ぐため元の値を代入
   return bez_edited_return;
 }
-function stretch_bezier_end(bez, t){
+
+function stretch_bezier_end(bez, t) {
   const start = [bez[0][0],
                  bez[0][1]];
   const c1 = [(1-t) * bez[0][0]+t * bez[1][0],
@@ -214,15 +216,16 @@ function stretch_bezier_end(bez, t){
                (1-t) * (1-t) * (1-t) * bez[0][1] + 3 * t * (1-t) * (1-t) * bez[1][1] + 3 * t * t * (1-t) * bez[2][1] + t * t * t * bez[3][1],]
   return [start, c1, c2, end];
 }
-export function bezier_to_y(bez, y){
+
+export function bezier_to_y(bez, y) {
   const a =     bez[3][1] - 3 * bez[2][1] + 3 * bez[1][1] - bez[0][1];
   const b = 3 * bez[2][1] - 6 * bez[1][1] + 3 * bez[0][1];
   const c = 3 * bez[1][1] - 3 * bez[0][1];
   const d =     bez[0][1];
   const yy = solveCubic(a, b, c, d - y);
   const ext = get_extreme_points(a, b, c);
-  function hit_extreme(x1, x2){
-    for (let e of ext){
+  function hit_extreme(x1, x2) {
+    for (let e of ext) {
       if (x1 < e && e < x2) return true;
     }
     return false;
@@ -245,13 +248,14 @@ export function bezier_to_y(bez, y){
   return bez;
 
   //var res = shorten_bezier_to_y(bez, y);
-  //if(res){return res;}else{
+  //if(res) {return res;}else{
   //  res = extend_bezier_to_y(bez, y);
-  //  if(res){return res;}else{
+  //  if(res) {return res;}else{
   //    return bez
   //  }
   //}
 }
+
 function extend_bezier_to_y(bez, y) {
   const a =     bez[3][1] - 3 * bez[2][1] + 3 * bez[1][1] - bez[0][1];
   const b = 3 * bez[2][1] - 6 * bez[1][1] + 3 * bez[0][1];
@@ -285,12 +289,13 @@ function shorten_bezier_to_y(bez, y) {
   }
   return false;
 }
-function get_extreme_points(a0, b0, c0){
+
+function get_extreme_points(a0, b0, c0) {
  let a = a0*3;
  let b = b0*2;
  let c = c0;
  let d = b * b - (4 * a * c);
- if(d > 0){
+ if(d > 0) {
     let x1 = ((-1) * b + Math.sqrt(d)) / (2 * a);
     let x2 = ((-1) * b - Math.sqrt(d)) / (2 * a);
     return [x1, x2]
@@ -300,6 +305,7 @@ function get_extreme_points(a0, b0, c0){
     return []
  }
 }
+
 function solveCubic(a, b, c, d) {
   if (Math.abs(a) < 1e-8) { // Quadratic case, ax^2+bx+c=0
       a = b; b = c; c = d;
@@ -348,6 +354,7 @@ function solveCubic(a, b, c, d) {
 
   return roots;
 }
+
 function cuberoot(x) {
   var y = Math.pow(Math.abs(x), 1/3);
   return x < 0 ? -y : y;

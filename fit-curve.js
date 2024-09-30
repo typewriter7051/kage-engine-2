@@ -58,7 +58,6 @@ export function fitCurve(points, maxError, progressCallback) {
  * @param {Number} error - Tolerance, squared error between points and fitted curve
  * @returns {Array<Array<Array<Number>>>} Array of Bezier curves, where each element is [first-point, control-point-1, control-point-2, second-point] and points are [x, y]
  */
-
 export function fitCubic_tang(points, tangents, error, progressCallback) {
     const MaxIterations = 20;   //Max times to try iterating (to find an acceptable curve)
 
@@ -85,7 +84,6 @@ export function fitCubic_tang(points, tangents, error, progressCallback) {
         ];
         return [bezCurve];
     }
-
 
     //Parameterize points, and attempt to fit curve
     u = chordLengthParameterize(points);

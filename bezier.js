@@ -2,9 +2,9 @@ import {unit_normal_vector, rad_to_vector, get_rad} from "./util.js";
 import {Polygon} from "./polygon.js";
 import {fitCubic_tang, fitCurve} from "./fit-curve.js";
 
-const bezier_steps = 200;
-
 export class Bezier {
+  static bezier_steps = 200;
+  static max_err = 0.03;
   /**
    * Takes in 3 functions and outputs two Bezier curves, one for each side.
    * x_fn, y_fn, width_fn should take in an argument 0 <= t <= 1 and output
@@ -16,14 +16,16 @@ export class Bezier {
 
     let x = x_fn(0);
     let y = y_fn(0);
-    for (var tt = 1; tt <= bezier_steps; tt++) {
-      const t = tt / bezier_steps;
+    let ia = 0;
+    let ib = 0;
+    for (var tt = 1; tt <= this.bezier_steps; tt++) {
+      const t = tt / this.bezier_steps;
       const new_x = x_fn(t);
       const new_y = y_fn(t);
       const vx = new_x - x;
       const vy = new_y - y;
 
-      let [ia, ib] = unit_normal_vector(vx, vy);
+      [ia, ib] = unit_normal_vector(vx, vy);
       const deltad = width_fn(t);
       ia = ia * deltad;
       ib = ib * deltad;
@@ -35,8 +37,12 @@ export class Bezier {
       y = new_y;
     }
 
-    const bez1 = fitCurve(a1, 0.03);
-    const bez2 = fitCurve(a2.reverse(), 0.03);
+    // Push the last point.
+    a1.push([x - ia, y - ib]);
+    a2.push([x + ia, y + ib]);
+
+    const bez1 = fitCurve(a1, this.max_err);
+    const bez2 = fitCurve(a2.reverse(), this.max_err);
 
     return [bez1, bez2];
   }
@@ -51,8 +57,8 @@ export class Bezier {
     var tang1 = [];
     var tang2 = [];
 
-    for (var tt = 0; tt <= bezier_steps; tt++) {
-      const t = tt / bezier_steps;
+    for (var tt = 0; tt <= this.bezier_steps; tt++) {
+      const t = tt / this.bezier_steps;
       const x = x_fun(t);
       const y = y_fun(t);
       const vx = dx_fun(t);
@@ -88,8 +94,8 @@ export class Bezier {
     var tang1 = [];
     var tang2 = [];
 
-    for (var tt = 0; tt <= bezier_steps; tt++) {
-      const t = tt / bezier_steps;
+    for (var tt = 0; tt <= this.bezier_steps; tt++) {
+      const t = tt / this.bezier_steps;
       const x = x_fun(t);
       const y = y_fun(t);
       const vx = dx_fun(t);
@@ -111,8 +117,8 @@ export class Bezier {
 
     //const bez1 = fitCubic_tang(a1, tang1, 0.03);
     //const bez2 = fitCubic_tang(a2.reverse(), tang2.reverse(), 0.03);
-    const bez1 = fitCurve(a1, 0.03);
-    const bez2 = fitCurve(a2.reverse(), 0.03);
+    const bez1 = fitCurve(a1, this.max_err);
+    const bez2 = fitCurve(a2.reverse(), this.max_err);
 
     return [bez1, bez2];
   }
@@ -186,8 +192,8 @@ export class Bezier {
     let ex = dir_x/len;
     let ey = dir_y/len;
     
-    for (var tt = 0; tt <= bezier_steps; tt++) {
-      const t = tt / bezier_steps;
+    for (var tt = 0; tt <= this.bezier_steps; tt++) {
+      const t = tt / this.bezier_steps;
       const x = x_fun(t);
       const y = y_fun(t);
       const vx = dx_fun(t);
@@ -208,8 +214,8 @@ export class Bezier {
 
     //const bez1 = fitCubic_tang(a1, tang1, 0.03);
     //const bez2 = fitCubic_tang(a2.reverse(), tang2.reverse(), 0.03);
-    const bez1 = fitCurve(a1, 0.01);
-    const bez2 = fitCurve(a2.reverse(), 0.01);
+    const bez1 = fitCurve(a1, this.max_err);
+    const bez2 = fitCurve(a2.reverse(), this.max_err);
 
     return [bez1, bez2];
   }

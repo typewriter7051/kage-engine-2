@@ -418,6 +418,8 @@ export class Gothic2 extends Font {
   createOpenCurve(body1, body2, x1, y1, x2, y2, x3, y3) {
     let half_width = this.kWidth * 0.5;
 
+    Bezier.bezier_steps = 100;
+    Bezier.max_err = 0.05;
     let [bez1, bez2] = Bezier.qBezier(x1, y1, x2, y2, x3, y3, t => half_width);
 
     for (let i = 0; i < bez1.length; i++) {
