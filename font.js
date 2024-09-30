@@ -10,6 +10,9 @@ export class Font {
     }
   }
 
+  /**
+   * Takes in an array of string stroke data and returns an array of polygons.
+   */
   getPolygons(strokesArray) {
     throw new Error("Function getPolygons() must be implemented.");
   }

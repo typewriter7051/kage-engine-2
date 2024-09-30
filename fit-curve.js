@@ -143,9 +143,6 @@ export function fitCubic_tang(points, tangents, error, progressCallback) {
     return beziers;
 };
 
-
-
-
 function fitCubic(points, leftTangent, rightTangent, error, progressCallback) {
     const MaxIterations = 20;   //Max times to try iterating (to find an acceptable curve)
 

@@ -1,3 +1,4 @@
+import { Bezier } from "../../bezier.js";
 import { FontCanvas } from "../../fontcanvas.js";
 import { Polygons } from "../../polygons.js";
 import { Font } from "../../font.js";
@@ -415,28 +416,23 @@ export class Gothic2 extends Font {
    * in body1 and body2 respectively.
    */
   createOpenCurve(body1, body2, x1, y1, x2, y2, x3, y3) {
-    let dir12 = get_dir(x2 - x1, y2 - y1);
-    let dir23 = get_dir(x3 - x2, y3 - y2);
-    let p = new PointMaker(x1, y1, dir12);
     let half_width = this.kWidth * 0.5;
 
-    // Beginning segment.
-    body1.push({p: p.vec(0, -half_width), off: 0});
-    body2.push({p: p.vec(0, half_width), off: 0});
+    let [bez1, bez2] = Bezier.qBezier(x1, y1, x2, y2, x3, y3, t => half_width);
 
-    // Middle segment.
-    let [middle_dir, middle_mag] = this.lineBendExpandParams(x1, y1, x2, y2, x3, y3);
+    for (let i = 0; i < bez1.length; i++) {
+      body1.push({p: bez1[i][0], off: 0});
+      body1.push({p: bez1[i][1], off: 2});
+      body1.push({p: bez1[i][2], off: 2});
+      body1.push({p: bez1[i][3], off: 0});
+    }
 
-    p.setpos(x2, y2);
-    p.setdir(middle_dir);
-    body1.push({p: p.vec(0, -half_width * middle_mag), off: 1});
-    body2.unshift({p: p.vec(0, half_width * middle_mag), off: 1});
-
-    // Ending segment.
-    p.setpos(x3, y3);
-    p.setdir(dir23);
-    body1.push({p: p.vec(0, -half_width), off: 0});
-    body2.unshift({p: p.vec(0, half_width), off: 0});
+    for (let i = 0; i < bez2.length; i++) {
+      body2.push({p: bez2[i][0], off: 0});
+      body2.push({p: bez2[i][1], off: 2});
+      body2.push({p: bez2[i][2], off: 2});
+      body2.push({p: bez2[i][3], off: 0});
+    }
   }
 
   /**
