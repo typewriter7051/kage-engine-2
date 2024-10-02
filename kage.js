@@ -17,10 +17,11 @@ export const KShotai = {
 export class Kage {
   constructor(type, size, precision) {
     this.kBuhin = new Buhin();
-    this.setFont(type,size);
+    this.setFont(type, size);
     this.kRate = 100;
     this.precision = 5;
   }
+
   setFont(type, size) {
     switch(type) {
       case FONTTYPE.GOTHIC: {
@@ -37,14 +38,17 @@ export class Kage {
       }
     }
   }
+
   makeGlyph(polygons, buhin) { // The word "buhin" means "component".  This method converts buhin (KAGE data format) to polygons (path data).  The variable buhin may represent a component of kanji or a kanji itself.
     var glyphData = this.kBuhin.search(buhin);
     this.makeGlyph2(polygons, glyphData);
   }
+
   makeGlyph2(polygons, data) {
     var kageStrokes = this.getStrokes(data);
     polygons.concat(this.kFont.getPolygons(kageStrokes));
   }
+
   makeGlyph3(data) { // void
     var kageStrokes = this.getStrokes(data);
     return this.kFont.getPolygons(kageStrokes);
@@ -57,10 +61,12 @@ export class Kage {
       return result;
     });
   }
+
   makeGlyphSeparated(data) {
     const strokesArrays = data.map((subdata) => this.getStrokes(subdata));
     return this.kFont.getPolygonsSeparated(strokesArrays);
   }
+
   getStrokes(glyphData) { // strokes array
     var strokes = new Array();
     var textData = glyphData.split("$");
@@ -97,6 +103,7 @@ export class Kage {
         }
       }
     }
+
     return strokes;
   }
 
@@ -104,6 +111,7 @@ export class Kage {
     var temp = this.getStrokes(buhin);
     var result = new Array();
     var box = getBoundingBox(temp);
+
     if (sx != 0 || sy != 0) {
       if (sx > 100) {
         sx -= 200;
@@ -112,12 +120,14 @@ export class Kage {
         sy2 = 0;
       }
     }
+
     for (var i = 0; i < temp.length; i++) {
       if (sx != 0 || sy != 0) {
         temp[i][3] = stretch(sx, sx2, temp[i][3], box.minX, box.maxX);
         temp[i][4] = stretch(sy, sy2, temp[i][4], box.minY, box.maxY);
         temp[i][5] = stretch(sx, sx2, temp[i][5], box.minX, box.maxX);
         temp[i][6] = stretch(sy, sy2, temp[i][6], box.minY, box.maxY);
+
         if (temp[i][0] != STROKETYPE.REFERENCE) {
           temp[i][7] = stretch(sx, sx2, temp[i][7], box.minX, box.maxX);
           temp[i][8] = stretch(sy, sy2, temp[i][8], box.minY, box.maxY);
@@ -125,6 +135,7 @@ export class Kage {
           temp[i][10] = stretch(sy, sy2, temp[i][10], box.minY, box.maxY);
         }
       }
+
       result.push([temp[i][0],
         temp[i][1],
         temp[i][2],
@@ -138,6 +149,7 @@ export class Kage {
         y1 + temp[i][10] * (y2 - y1) / 200]);
 
     }
+
     return result;
   }
 
@@ -171,9 +183,11 @@ export class Kage {
 
     return ss;
   }
+
   getBox(strokes){
     return getBoundingBox(strokes);
   }
+
   stretch(dp, sp, p, min, max){
     return stretch(dp, sp, p, min, max);
   }

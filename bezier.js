@@ -18,6 +18,7 @@ export class Bezier {
     let y = y_fn(0);
     let ia = 0;
     let ib = 0;
+
     for (var tt = 1; tt <= this.bezier_steps; tt++) {
       const t = tt / this.bezier_steps;
       const new_x = x_fn(t);
@@ -114,17 +115,45 @@ export class Bezier {
 
     return this.generalBezier(x_fn, y_fn, width_fn);
   }
-  
-  static bez_to_poly(bez) {
-    var poly = new Polygon();
-    poly.push(bez[0][0][0], bez[0][0][1]);
 
-    for(let bez1 of bez) {
-      poly.push(bez1[1][0], bez1[1][1], 2);
-      poly.push(bez1[2][0], bez1[2][1], 2);
-      poly.push(bez1[3][0], bez1[3][1]);
+  /**
+   * Given a bezier path (array of bezier curves) convert into an SVG path.
+   */
+  static bezierToPath(bezier) {
+    let buffer = "";
+
+    for (let curve = 0; curve < bezier.length; curve++) {
+      let x = bezier[curve][0][0];
+      let y = bezier[curve][0][1];
+      buffer += "M";
+      buffer += x + "," + y + " ";
+
+      switch (bezier[curve].length) {
+        case 2: { // Line.
+          buffer += "L";
+          break;
+        }
+        case 3: { // Quadratic.
+          buffer += "Q";
+          break;
+        }
+        case 4: { // Cubic.
+          buffer += "C";
+          break;
+        }
+        default: // Unknown curve.
+          break;
+      }
+
+      for (let point = 1; point < bezier[curve].length; point++) {
+        x = bezier[curve][point][0];
+        y = bezier[curve][point][1];
+        buffer += x + "," + y + " ";
+      }
     }
 
-    return poly;
+    buffer += "Z";
+
+    return buffer;
   }
 }
