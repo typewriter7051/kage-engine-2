@@ -530,11 +530,4 @@ export class FontCanvas {
     }
     this.polygons.push(poly);
   }
-
-  drawQBezier2(x1, y1, sx, sy, x2, y2, width_func, width_func_d, curve_step) {
-    let [bez1, bez2] = Bezier.qBezier2(x1, y1, sx, sy, x2, y2, width_func, width_func_d, curve_step);
-    var poly = Bezier.bez_to_poly(bez1);
-    poly.concat(Bezier.bez_to_poly(bez2));
-    this.polygons.push(poly);
-  }
 }
