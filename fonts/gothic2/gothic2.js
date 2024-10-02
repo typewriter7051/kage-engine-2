@@ -195,10 +195,7 @@ export class Gothic2 extends Font {
    * Sets the stroke's body to a line given points x1, y1 and x2, y2.
    */
   setBodyStraight(stroke, x1, y1, x2, y2) {
-    stroke.body1 = new Array();
-    stroke.body2 = new Array();
-
-    this.createOpenLine(stroke.body1, stroke.body2, x1, y1, x2, y2);
+    [stroke.body1, stroke.body2] = this.createOpenLine(x1, y1, x2, y2);
   }
 
   /**
@@ -206,10 +203,7 @@ export class Gothic2 extends Font {
    * and x3, y3.
    */
   setBodyCurve(stroke, x1, y1, x2, y2, x3, y3) {
-    stroke.body1 = new Array();
-    stroke.body2 = new Array();
-
-    this.createOpenCurve(stroke.body1, stroke.body2, x1, y1, x2, y2, x3, y3);
+    [stroke.body1, stroke.body2] = this.createOpenCurve(x1, y1, x2, y2, x3, y3);
   }
 
   /**
@@ -234,9 +228,9 @@ export class Gothic2 extends Font {
     let [tx1, ty1] = get_extended_dest(x2, y2, x1, y1, -this.kMage * bend_amt);
     let [tx2, ty2] = get_extended_dest(x2, y2, x3, y3, -this.kMage * bend_amt);
 
-    this.createOpenLine(line11, line12, x1, y1, tx1, ty1);
-    this.createOpenCurve(curve1, curve2, tx1, ty1, x2, y2, tx2, ty2);
-    this.createOpenLine(line21, line22, tx2, ty2, x3, y3);
+    [line11, line12] = this.createOpenLine(x1, y1, tx1, ty1);
+    [curve1, curve2] = this.createOpenCurve(tx1, ty1, x2, y2, tx2, ty2);
+    [line21, line22] = this.createOpenLine(tx2, ty2, x3, y3);
 
     stroke.body1 = Stroke.mergePaths([line11, curve1, line21]);
     stroke.body2 = Stroke.mergePaths([line22, curve2, line12]);
@@ -294,8 +288,8 @@ export class Gothic2 extends Font {
     let curve1 = new Array();
     let curve2 = new Array();
 
-    this.createOpenLine(line1, line2, x1, y1, x2, y2);
-    this.createOpenCurve(curve1, curve2, x2, y2, x3, y3, x4, y4);
+    [line1, line2] = this.createOpenLine(x1, y1, x2, y2);
+    [curve1, curve2] = this.createOpenCurve(x2, y2, x3, y3, x4, y4);
 
     stroke.body1 = Stroke.mergePaths([line1, curve1]);
     stroke.body2 = Stroke.mergePaths([curve2, line2]);
@@ -322,8 +316,7 @@ export class Gothic2 extends Font {
     stroke.body1[stroke.body1.length - 1] = body1_p;
     stroke.body2[0] = body2_p;
 
-    this.createOpenCurve(
-      curve1, curve2,
+    [curve1, curve2] = this.createOpenCurve(
       tx, ty,
       stroke.end_point[0], stroke.end_point[1],
       stroke.end_point[0] - 1.25 * this.kMage, stroke.end_point[1]
@@ -353,8 +346,7 @@ export class Gothic2 extends Font {
     stroke.body1[stroke.body1.length - 1] = body1_p;
     stroke.body2[0] = body2_p;
 
-    this.createOpenCurve(
-      curve1, curve2,
+    [curve1, curve2] = this.createOpenCurve(
       tx, ty,
       stroke.end_point[0], stroke.end_point[1],
       stroke.end_point[0], stroke.end_point[1] - 1.25 * this.kMage
@@ -396,10 +388,13 @@ export class Gothic2 extends Font {
    * clockwise so body1 represents the first (left) side and body2 the second
    * (right).
    */
-  createOpenLine(body1, body2, x1, y1, x2, y2) {
+  createOpenLine(x1, y1, x2, y2) {
     let dir12 = get_dir(x2 - x1, y2 - y1);
     let p = new PointMaker(x1, y1, dir12);
     let half_width = this.kWidth * 0.5;
+
+    let body1 = new Array();
+    let body2 = new Array();
 
     // Left side (assuming horizontal stroke).
     body1.push({p: p.vec(0, -half_width), off: 0});
@@ -409,14 +404,19 @@ export class Gothic2 extends Font {
     p.setpos(x2, y2);
     body1.push({p: p.vec(0, -half_width), off: 0});
     body2.unshift({p: p.vec(0, half_width), off: 0});
+
+    return [body1, body2];
   }
 
   /**
    * Creates an open-ended thickened quadratic Bezier curve and stores each side
    * in body1 and body2 respectively.
    */
-  createOpenCurve(body1, body2, x1, y1, x2, y2, x3, y3) {
+  createOpenCurve(x1, y1, x2, y2, x3, y3) {
     let half_width = this.kWidth * 0.5;
+
+    let body1 = new Array();
+    let body2 = new Array();
 
     Bezier.bezier_steps = 100;
     Bezier.max_err = 0.05;
@@ -435,6 +435,8 @@ export class Gothic2 extends Font {
       body2.push({p: bez2[i][2], off: 2});
       body2.push({p: bez2[i][3], off: 0});
     }
+
+    return [body1, body2];
   }
 
   /**
