@@ -501,14 +501,16 @@ export class FontCanvas {
   }
 
   drawCBezier(x1, y1, sx1, sy1, sx2, sy2, x2, y2, width_func, width_func_d, curve_step) {
-    let [bez1, bez2] = Bezier.cBezier(x1, y1, sx1, sy1, sx2, sy2, x2, y2, width_func, width_func_d, curve_step);
+    //let [bez1, bez2] = Bezier.cBezier(x1, y1, sx1, sy1, sx2, sy2, x2, y2, width_func, width_func_d, curve_step);
+    let [bez1, bez2] = Bezier.thickenCurve([[x1, y1], [sx1, sy1], [sx2, sy2], [x2, y2]], width_func);
     var poly = Bezier.bez_to_poly(bez1);
     poly.concat(Bezier.bez_to_poly(bez2));
     this.polygons.push(poly);
   }
 
   drawQBezier(x1, y1, sx, sy, x2, y2, width_func, width_func_d, curve_step, fix_begin, fix_end) {
-    let [bez1, bez2] = Bezier.qBezier(x1, y1, sx, sy, x2, y2, width_func, width_func_d, curve_step);
+    //let [bez1, bez2] = Bezier.qBezier(x1, y1, sx, sy, x2, y2, width_func, width_func_d, curve_step);
+    let [bez1, bez2] = Bezier.thickenCurve([[x1, y1], [sx, sy], [x2, y2]], width_func);
     var poly = Bezier.bez_to_poly(bez1);
     if (fix_end) {
       var p = new PointMaker(x2, y2, get_dir(x2-sx, y2-sy), 1);

@@ -443,7 +443,8 @@ export class Mincho extends Font {
         const width_func = function (t) {
           return (kMinWidthT_mage - kMinWidthT_m) * t + kMinWidthT_m;
         }        
-        let [bez1, bez2] = Bezier.qBezier(tx1, ty1, x2, y2, tx2, ty2, width_func, t => 0, undefined);
+        //let [bez1, bez2] = Bezier.qBezier(tx1, ty1, x2, y2, tx2, ty2, width_func, t => 0, undefined);
+        let [bez1, bez2] = Bezier.thickenCurve([[tx1, ty1], [x2, y2], [tx2, ty2]], width_func);
         poly_start.concat(Bezier.bez_to_poly(bez1));
         let edd = this.getEndOfLine(tx2, ty2, x3, y3, kMinWidthT_mage);
         poly_start.concat(edd);
@@ -626,7 +627,8 @@ export class Mincho extends Font {
       
       width_func = t => widfun_stop(t, x1, y1, x2, y2, kMinWidthT_mod)*thin_stop_param;
       width_func_d = t => widfun_stop_d(t, x1, y1, x2, y2, kMinWidthT_mod)*thin_stop_param;
-      [bez1, bez2] = Bezier.qBezier2(x1, y1, sx, sy, x2, y2, width_func, width_func_d);
+      //[bez1, bez2] = Bezier.qBezier2(x1, y1, sx, sy, x2, y2, width_func, width_func_d);
+      [bez1, bez2] = Bezier.thickenCurve([[x1, y1], [sx, sy], [x2, y2]], width_func);
     }
     else {
       if ((a1 == STARTTYPE.THIN || a1 == STARTTYPE.ROOFED_THIN) && a2 == ENDTYPE.OPEN) { // L2RD: fatten
@@ -651,7 +653,8 @@ export class Mincho extends Font {
         width_func = t => kMinWidthT_mod * (1 - t*end_width_factor);
         width_func_d = t => -kMinWidthT_mod*end_width_factor;
       }
-      [bez1, bez2] = Bezier.qBezier(x1, y1, sx, sy, x2, y2, width_func, width_func_d);
+      //[bez1, bez2] = Bezier.qBezier(x1, y1, sx, sy, x2, y2, width_func, width_func_d);
+      [bez1, bez2] = Bezier.thickenCurve([[x1, y1], [sx, sy], [x2, y2]], width_func);
     }
     if (a1 == 132 && x1 != sx) {
       let b1 = bezier_to_y(bez2[bez2.length - 1], y1);
@@ -763,7 +766,8 @@ export class Mincho extends Font {
       width_func = t => widfun_stop(t, x1, y1, x2, y2, kMinWidthT_mod);
       width_func_d = t => widfun_stop_d(t, x1, y1, x2, y2, kMinWidthT_mod);
 
-      [bez1, bez2] = Bezier.cBezier(x1, y1, sx1, sy1, sx2, sy2, x2, y2, width_func, width_func_d);
+      //[bez1, bez2] = Bezier.cBezier(x1, y1, sx1, sy1, sx2, sy2, x2, y2, width_func, width_func_d);
+      [bez1, bez2] = Bezier.thickenCurve([[x1, y1], [sx1, sy1], [sx2, sy2], [x2, y2]], width_func);
 
       //width_func = t => widfun_fat(t, x1, y1, x2, y2, kMinWidthT_mod);
       //width_func_d = t => widfun_fat_d(t, x1, y1, x2, y2, kMinWidthT_mod);
@@ -786,7 +790,8 @@ export class Mincho extends Font {
         width_func = t => kMinWidthT_mod;
         width_func_d = t => 0;
       }
-      [bez1, bez2] = Bezier.cBezier(x1, y1, sx1, sy1, sx2, sy2, x2, y2, width_func, width_func_d);
+      //[bez1, bez2] = Bezier.cBezier(x1, y1, sx1, sy1, sx2, sy2, x2, y2, width_func, width_func_d);
+      [bez1, bez2] = Bezier.thickenCurve([[x1, y1], [sx1, sy1], [sx2, sy2], [x2, y2]], width_func);
     }
     //以下は今は実行されないコードだが実行時には2次ベジエのときと同様にdeep copyが必要か？
     if (a1 == 132 && x1 != sx1) {

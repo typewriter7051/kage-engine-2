@@ -243,26 +243,27 @@ export class Bezier {
   }
 
   /**
-   * Takes in a curve and a width function, and outputs 2 curves.
+   * Takes in a curve and a width function, and outputs 2 arrays of curves.
    * A curve is an array of points, and the polynomial degree is determined by
    * the length of the array. For example [[0, 0], [10, 20]] is a line and
    * [[2, 4], [10, 10], [20, 10]] is a quadratic Bezier.
    */
   static thickenCurve(curve, width_fn) {
+    var x_fn, y_fn;
     switch (curve.length) {
       case 2: {
-        const x_fn = t => (1.0 - t) * curve[0][0] + t * curve[1][0];
-        const y_fn = t => (1.0 - t) * curve[0][1] + t * curve[1][1];
+        x_fn = t => (1.0 - t) * curve[0][0] + t * curve[1][0];
+        y_fn = t => (1.0 - t) * curve[0][1] + t * curve[1][1];
         break;
       }
       case 3: {
-        const x_fn = t => ((1.0 - t) * (1.0 - t) * curve[0][0] + 2.0 * t * (1.0 - t) * curve[1][0] + t * t * curve[2][0]);
-        const y_fn = t => ((1.0 - t) * (1.0 - t) * curve[0][1] + 2.0 * t * (1.0 - t) * curve[1][1] + t * t * curve[2][1]);
+        x_fn = t => ((1.0 - t) * (1.0 - t) * curve[0][0] + 2.0 * t * (1.0 - t) * curve[1][0] + t * t * curve[2][0]);
+        y_fn = t => ((1.0 - t) * (1.0 - t) * curve[0][1] + 2.0 * t * (1.0 - t) * curve[1][1] + t * t * curve[2][1]);
         break;
       }
       case 4: {
-        const x_fn = t => (1.0 - t) * (1.0 - t) * (1.0 - t) * curve[0][0] + 3.0 * t * (1.0 - t) * (1.0 - t) * curve[1][0] + 3 * t * t * (1.0 - t) * curve[2][0] + t * t * t * curve[3][0];
-        const y_fn = t => (1.0 - t) * (1.0 - t) * (1.0 - t) * curve[0][1] + 3.0 * t * (1.0 - t) * (1.0 - t) * curve[1][1] + 3 * t * t * (1.0 - t) * curve[2][1] + t * t * t * curve[3][1];
+        x_fn = t => (1.0 - t) * (1.0 - t) * (1.0 - t) * curve[0][0] + 3.0 * t * (1.0 - t) * (1.0 - t) * curve[1][0] + 3 * t * t * (1.0 - t) * curve[2][0] + t * t * t * curve[3][0];
+        y_fn = t => (1.0 - t) * (1.0 - t) * (1.0 - t) * curve[0][1] + 3.0 * t * (1.0 - t) * (1.0 - t) * curve[1][1] + 3 * t * t * (1.0 - t) * curve[2][1] + t * t * t * curve[3][1];
         break;
       }
       default:

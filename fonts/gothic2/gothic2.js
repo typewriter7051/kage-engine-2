@@ -420,7 +420,8 @@ export class Gothic2 extends Font {
 
     Bezier.bezier_steps = 100;
     Bezier.max_err = 0.05;
-    let [bez1, bez2] = Bezier.qBezier(x1, y1, x2, y2, x3, y3, t => half_width);
+    //let [bez1, bez2] = Bezier.qBezier(x1, y1, x2, y2, x3, y3, t => half_width);
+    let [bez1, bez2] = Bezier.thickenCurve([[x1, y1], [x2, y2], [x3, y3]], t => half_width);
 
     for (let i = 0; i < bez1.length; i++) {
       body1.push({p: bez1[i][0], off: 0});
