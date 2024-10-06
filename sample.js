@@ -4,15 +4,12 @@
 // % java -jar js.jar sample.js > result.svg (Rhino untested)
 
 import { Kage } from "kage.js";
-import { Polygons } from "polygons.js";
-import { Gothic2 } from "./fonts/gothic2/gothic2.js";
 import { Gothic } from "./fonts/gothic/gothic.js";
+import { GothicWeb } from "./fonts/gothic-web/gothic-web.js";
+import { Gothic2 } from "./fonts/gothic2/gothic2.js";
 
 var kage = new Kage();
-var polygons = new Polygons();
-
-kage.kFont = new Gothic2(10);
-//kage.kFont = new Gothic(10);
+kage.kFont = new GothicWeb(10);
 
 /*
 kage.kBuhin.push("u99ac-01", "1:12:13:28:28:28:110$1:2:0:28:28:96:28$1:32:32:60:28:60:110$1:2:0:28:56:95:56$1:2:0:28:83:95:83$1:2:2:28:110:88:110$2:22:4:88:110:90:156:73:183$2:7:8:27:124:30:160:17:172$2:7:8:37:127:45:147:42:164$2:7:8:47:124:58:138:59:155$2:7:8:56:118:69:127:73:142");
@@ -23,7 +20,15 @@ kage.kBuhin.push("u6c38", "1:0:2:16:38:77:38$2:22:7:77:38:63:132:13:180$2:7:8:19
 
 kage.kBuhin.push("u6c38", "1:0:0:20:32:180:32$1:0:2:32:61:143:61$4:22:5:143:61:12:168:174:168");
 
-kage.makeGlyph(polygons, "u6c38");
+// Old method.
 
+/*
+kage.makeGlyph(polygons, "u6c38");
 print(polygons.generateSVG(false));
+*/
+
+// New method.
+
+let paths = kage.getPaths("u6c38");
+print(kage.generateSVG(paths));
 

@@ -115,45 +115,4 @@ export class Bezier {
 
     return this.generalBezier(x_fn, y_fn, width_fn);
   }
-
-  /**
-   * Given a bezier path (array of bezier curves) convert into an SVG path.
-   */
-  static bezierToPath(bezier) {
-    let buffer = "";
-
-    for (let curve = 0; curve < bezier.length; curve++) {
-      let x = bezier[curve][0][0];
-      let y = bezier[curve][0][1];
-      buffer += "M";
-      buffer += x + "," + y + " ";
-
-      switch (bezier[curve].length) {
-        case 2: { // Line.
-          buffer += "L";
-          break;
-        }
-        case 3: { // Quadratic.
-          buffer += "Q";
-          break;
-        }
-        case 4: { // Cubic.
-          buffer += "C";
-          break;
-        }
-        default: // Unknown curve.
-          break;
-      }
-
-      for (let point = 1; point < bezier[curve].length; point++) {
-        x = bezier[curve][point][0];
-        y = bezier[curve][point][1];
-        buffer += x + "," + y + " ";
-      }
-    }
-
-    buffer += "Z";
-
-    return buffer;
-  }
 }
