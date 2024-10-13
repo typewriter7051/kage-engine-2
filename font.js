@@ -26,7 +26,7 @@ export class Font {
 
     for(let path = 0; path < paths.length; path++) {
       buffer += "<path d=\"";
-      buffer += paths[path].toSVGSequence();
+      buffer += paths[path].toSVGSequence(5);
       buffer += "\" fill=\"black\" />\n";
     }
 

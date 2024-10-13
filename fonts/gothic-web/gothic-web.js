@@ -15,6 +15,8 @@ export class GothicWeb extends Font {
     this.kWidth = size;
     this.kMage = 10 + size * 0.5;
 
+    this.lineCap = "square";
+    this.lineJoin = "miter";
     this.precision = 2;
   }
 
@@ -26,27 +28,24 @@ export class GothicWeb extends Font {
     for (let stroke of strokes)
       skeletons.push(this.processSkeleton(stroke));
 
-    //return this.connectSkeletons(skeletons);
-    return skeletons;
+    return this.connectSkeletons(skeletons);
   }
 
+  /**
+   * Connects paths together within skeletons.
+   */
   connectSkeletons(skeletons) {
     for (let i = 0; i < skeletons.length; i++) {
-      for (let j = 0; j < skeletons.length; j++) {
-        if (i == j) continue;
-        let start_point = skeletons[i].curves[0][0];
-        let curve = skeletons.curves[j];
-        let end_point = curve[curve.length - 1];
-
-        if (start_point[0] == end_point[0] &&
-            start_point[1] == end_point[1]) {
-          skeletons[i].curves = skeletons[i].curves.concat(skeletons[j].curves);
+      for (let j = i + 1; j < skeletons.length; j++) {
+        if (skeletons[i].connectedTo(skeletons[j])) {
+          skeletons[i].connect(skeletons[j]);
           skeletons.splice(j, 1);
           j--;
-          if (i > j) i--;
         }
       }
     }
+
+    return skeletons;
   }
 
   /**
@@ -56,7 +55,7 @@ export class GothicWeb extends Font {
   processSkeleton(stroke) {
     // Move the endpoint down if the stroke end is a bottom corner.
     if (stroke[0] % 100 == STROKETYPE.STRAIGHT && stroke[2] % 10 == 3) {
-      stroke[6] += this.kWidth * 0.5 + 10;
+      stroke[6] += this.kWidth * 1;
     }
 
     let skeleton = this.baseSkeleton(stroke);
@@ -68,9 +67,12 @@ export class GothicWeb extends Font {
 
         let last_curve = skeleton.curves[skeleton.curves.length - 1];
         let end_point = last_curve[last_curve.length - 1];
+        let second_end_point = last_curve[last_curve.length - 2];
+        let dir = get_dir(end_point[0] - second_end_point[0],
+                          end_point[1] - second_end_point[1]);
         let [tx, ty] = moved_point(end_point[0], end_point[1], dir,
                                    -this.kMage);
-        skeleton.curves[skeleton.curves.length - 1][last_curve.length - 1] = end_point;
+        skeleton.curves[skeleton.curves.length - 1][last_curve.length - 1] = [tx, ty];
 
         /* Add new curve. */
 
@@ -93,9 +95,9 @@ export class GothicWeb extends Font {
         let [tx, ty] = moved_point(end_point[0], end_point[1], dir,
                                    -this.kMage);
         // Set the endpoint of the curve.
-        skeleton.curves[skeleton.curves.length - 1][last_curve.length - 1] = end_point;
+        skeleton.curves[skeleton.curves.length - 1][last_curve.length - 1] = [tx, ty];
 
-        /* Add new curve. */
+        /* Replace last curve. */
 
         skeleton.curves.push([
           [tx, ty],
@@ -166,7 +168,7 @@ export class GothicWeb extends Font {
         ]);
         skeleton.curves.push([
           [tx2, ty2],
-          [x2, y2]
+          [x3, y3]
         ]);
         break;
       }
@@ -205,10 +207,10 @@ export class GothicWeb extends Font {
 
     for(let path of paths) {
       buffer += "<path d=\"";
-      buffer += path.toSVGSequence();
+      buffer += path.toSVGSequence(this.precision);
       buffer += "\" stroke-width=\"" + this.kWidth;
-      buffer += "\" line-cap=\"" + "round";
-      buffer += "\" stroke-linejoin=\"" + "round";
+      buffer += "\" stroke-linecap=\"" + this.lineCap;
+      buffer += "\" stroke-linejoin=\"" + this.lineJoin;
       buffer += "\" fill=\"" + "transparent";
       buffer += "\" stroke=\"" + "black";
       buffer += "\" />\n";
