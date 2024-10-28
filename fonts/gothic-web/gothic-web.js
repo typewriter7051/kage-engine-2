@@ -1,8 +1,8 @@
-import { Bezier } from "../../bezier.js";
+import { Bezier } from "../../curve/bezier.js";
 import { Font } from "../../font.js";
 import { STROKETYPE, STARTTYPE, ENDTYPE } from "../../stroketype.js";
 import { get_dir, moved_point, get_extended_dest } from "../../util.js";
-import { Path } from "../../path.js";
+import { Path } from "../../curve/path.js";
 
 export class GothicWeb extends Font {
   constructor(size) {

@@ -1,6 +1,6 @@
 import { Buhin } from "./buhin.js";
-import { STROKETYPE } from "./stroketype.js";
-import { getBoundingBox, stretch } from "./util.js";
+import { STROKETYPE } from "../stroketype.js";
+import { getBoundingBox, stretch } from "../util.js";
 
 export class Kage {
   /**
@@ -12,11 +12,26 @@ export class Kage {
   }
 
   /**
-   * Retrieves the KAGE stroke data given the character.
+   * Given a character or composition sequence (e.g. ) return the generated SVG.
    */
-  getPaths(buhin) {
-    let glyphData = this.kBuhin.search(buhin);
+  char2SVG(str) {
+    let ids = str2IDS(str);
+    let paths = IDS2Paths(ids);
+    return generateSVG(paths);
+  }
+
+  /**
+   * Retrieves the KAGE stroke data given the character IDS string.
+   */
+  IDS2Paths(ids) {
+    let glyphData = this.kBuhin.search(ids);
+
+    if (glyphData === "") {
+      glyphData = this.generateGlyphData(ids);
+      this.kBuhin.set(ids, glyphData);
+    }
     let kageStrokes = this.getStrokes(glyphData);
+
     return this.kFont.getPaths(kageStrokes);
   }
 
@@ -27,6 +42,7 @@ export class Kage {
     return this.kFont.generateSVG(paths);
   }
 
+  /*
   makeGlyph(polygons, buhin) { // The word "buhin" means "component".  This method converts buhin (KAGE data format) to polygons (path data).  The variable buhin may represent a component of kanji or a kanji itself.
     var glyphData = this.kBuhin.search(buhin);
     this.makeGlyph2(polygons, glyphData);
@@ -54,6 +70,7 @@ export class Kage {
     const strokesArrays = data.map((subdata) => this.getStrokes(subdata));
     return this.kFont.getPolygonsSeparated(strokesArrays);
   }
+  */
 
   getStrokes(glyphData) { // strokes array
     var strokes = new Array();
@@ -178,5 +195,57 @@ export class Kage {
 
   stretch(dp, sp, p, min, max){
     return stretch(dp, sp, p, min, max);
+  }
+
+  /**
+   * Convert a string input (e.g. "⿰女子") into the IDS format. This function
+   * should not take in nested compositions like "⿰糹⿱土口".
+   */
+  str2IDS(input) {
+    var result = new Array();
+
+    for(i = 0; i < input.length; i++) {
+      var unicode;
+
+      if(input.charCodeAt(i) < 0xd800 || input.charCodeAt(i) > 0xdfff) {
+        unicode = input.charCodeAt(i).toString(16).toLowerCase();
+        unicode = "u" + ("000" + unicode).substr(unicode.length - 1, 4);		 
+      } else {
+        var unicode = (input.charCodeAt(i) - 0xd800) * 0x0400 + input.charCodeAt(i + 1) - 0xdc00 + 0x10000;
+        unicode = "u" + unicode.toString(16).toLowerCase();
+        i++;
+      }
+
+      result.push(unicode);
+    }
+
+    return result.join("-");
+  }
+
+  /**
+   * Takes the ids of a single character and decomposes it, for example:
+   * u597d -> u2ff0-u5973-u5b50
+   * (好 -> ⿰女子)
+   */
+  decomposeCharIDS(ids) {
+    /* TODO */
+  }
+
+  /**
+   * Given an IDS string, generate the KAGE glyph data with adjusted
+   * proportions.
+   */
+  generateGlyphData(ids) {
+    let components = ids.split("-");
+
+    // Ensure all dependencies are generated.
+    for (let i = 1; i < components.length; i++) {
+      if (this.kBuhin.search() === "") {
+        let decomposed = this.decomposeCharIDS(components[i]);
+        this.kBuhin.set(components[i], generateGlyphData(decomposed));
+      }
+    }
+
+    /* TODO: Take dependency components and adjust them. */
   }
 }

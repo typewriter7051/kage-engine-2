@@ -1,6 +1,5 @@
-import { unit_normal_vector, rad_to_vector, get_rad } from "./util.js";
-import { Polygon } from "./polygon.js";
-import { fitCubic_tang, fitCurve } from "./fit-curve.js";
+import { unit_normal_vector, rad_to_vector, get_rad } from "../util.js";
+import { fitCurve } from "./fit-curve.js";
 
 export class Bezier {
   static bezier_steps = 200;
@@ -76,8 +75,6 @@ export class Bezier {
       tang2.push(rad_to_vector(rad+width_rad-Math.PI));
     }
 
-    //const bez1 = fitCubic_tang(a1, tang1, 0.03);
-    //const bez2 = fitCubic_tang(a2.reverse(), tang2.reverse(), 0.03);
     const bez1 = fitCurve(a1, this.max_err);
     const bez2 = fitCurve(a2.reverse(), this.max_err);
 
@@ -99,13 +96,23 @@ export class Bezier {
         break;
       }
       case 3: {
-        x_fn = t => ((1.0 - t) * (1.0 - t) * curve[0][0] + 2.0 * t * (1.0 - t) * curve[1][0] + t * t * curve[2][0]);
-        y_fn = t => ((1.0 - t) * (1.0 - t) * curve[0][1] + 2.0 * t * (1.0 - t) * curve[1][1] + t * t * curve[2][1]);
+        x_fn = t => ((1.0 - t) * (1.0 - t) * curve[0][0] +
+                    2.0 * t * (1.0 - t) * curve[1][0] +
+                    t * t * curve[2][0]);
+        y_fn = t => ((1.0 - t) * (1.0 - t) * curve[0][1] +
+                    2.0 * t * (1.0 - t) * curve[1][1] +
+                    t * t * curve[2][1]);
         break;
       }
       case 4: {
-        x_fn = t => (1.0 - t) * (1.0 - t) * (1.0 - t) * curve[0][0] + 3.0 * t * (1.0 - t) * (1.0 - t) * curve[1][0] + 3 * t * t * (1.0 - t) * curve[2][0] + t * t * t * curve[3][0];
-        y_fn = t => (1.0 - t) * (1.0 - t) * (1.0 - t) * curve[0][1] + 3.0 * t * (1.0 - t) * (1.0 - t) * curve[1][1] + 3 * t * t * (1.0 - t) * curve[2][1] + t * t * t * curve[3][1];
+        x_fn = t => (1.0 - t) * (1.0 - t) * (1.0 - t) * curve[0][0] +
+                    3.0 * t * (1.0 - t) * (1.0 - t) * curve[1][0] +
+                    3 * t * t * (1.0 - t) * curve[2][0] +
+                    t * t * t * curve[3][0];
+        y_fn = t => (1.0 - t) * (1.0 - t) * (1.0 - t) * curve[0][1] +
+                    3.0 * t * (1.0 - t) * (1.0 - t) * curve[1][1] +
+                    3 * t * t * (1.0 - t) * curve[2][1] +
+                    t * t * t * curve[3][1];
         break;
       }
       default:
