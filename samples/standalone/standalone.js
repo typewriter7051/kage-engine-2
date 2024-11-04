@@ -2,6 +2,7 @@
 //
 // % js -m standalone.js > result.svg (SpiderMonkey)
 // % java -jar js.jar standalone.js > result.svg (Rhino untested)
+// % node standalone.js > result.svg (NodeJS)
 
 import { Kage } from "../../kage/kage.js";
 import { GothicWeb } from "../../fonts/gothic-web/gothic-web.js";
@@ -35,5 +36,6 @@ print(polygons.generateSVG(false));
 // New method.
 
 let paths = kage.IDS2Paths("u6c38");
-print(kage.generateSVG(paths));
+//print(kage.generateSVG(paths));
+console.log(kage.generateSVG(paths));
 

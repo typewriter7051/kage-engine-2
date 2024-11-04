@@ -65,5 +65,6 @@ Since the school semester has started I haven't got as much time as I would like
 
 - [x] Make web Gothic.
 - [x] Redo code structure to make it easier to create new fonts.
+- Convert codebase to typescript.
 - Implement a serif font that uses ``Path``.
 
