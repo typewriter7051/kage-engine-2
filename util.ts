@@ -54,24 +54,26 @@ export function widfun_fat_d(t, x1, y1, x2, y2, wid) {
   return wid*(1-CURVE_THIN)*0.5*2*(p-t) / Math.sqrt(p*p + (p-1)*(p-1) - (p-t)*(p-t));
 }
 
-export function get_dir(x, y) {
-  if (y==0) {
-    if(x<0) {
+/*
+export function get_dir(x: number, y: number): Direction {
+  if (y == 0) {
+    if(x < 0) {
       return {sin: 0, cos: -1};
-    }else{
+    } else {
       return {sin: 0, cos:  1};
     }
-  }else if(x==0) {
-    if(y<0) {
+  } else if (x == 0) {
+    if(y < 0) {
       return {sin: -1, cos: 0};
-    }else{
+    } else {
       return {sin:  1, cos: 0};
     }
-  }else{
+  } else {
     const rad = Math.atan2(y, x);
     return {sin:  Math.sin(rad), cos: Math.cos(rad)};
   }
 }
+
 export const DIR_POSX = {sin: 0, cos: 1};
 export const DIR_POSY = {sin: 1, cos: 0};
 export const DIR_NEGX = {sin: 0, cos: -1};
@@ -150,6 +152,7 @@ function calc_hosomi(x1, y1, x2, y2) {
   }
   return hosomi;
 }
+*/
 
 /**
  * New version returns value between 0 and 2pi.
@@ -377,7 +380,7 @@ export function stretch(dp, sp, p, min, max) { // integer
 }
 
 export function getBoundingBox(strokes) { // minX, minY, maxX, maxY
-  var a = new Object();
+  var a: {minX: number, minY: number, maxX: number, maxY: number};
   a.minX = 200;
   a.minY = 200;
   a.maxX = 0;

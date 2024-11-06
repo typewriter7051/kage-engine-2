@@ -4,19 +4,21 @@
  * strokes.
  */
 export class Buhin {
-  constructor(number) {
+  hash;
+
+  constructor() {
     this.hash = {};
   }
 
-  set(name, data) { // void
+  set(name: string, data: string): void {
     this.hash[name] = data;
   }
 
-  push(name, data) { // void
+  push(name: string, data: string): void {
     this.set(name, data);
   }
 
-  search(name) { // string
+  search(name: string): string {
     if(this.hash[name])
       return this.hash[name];
 

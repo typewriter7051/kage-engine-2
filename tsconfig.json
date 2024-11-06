@@ -1,0 +1,18 @@
+{
+    "compilerOptions": {
+        "allowImportingTsExtensions": true,
+        "noEmit": true
+    },
+    "files": [
+        "./curve/bezier.ts",
+        "./curve/curve-types.ts",
+        "./curve/fit-curve.ts",
+        "./curve/path.ts",
+        "./fonts/gothic-web/gothic-web.ts",
+        "./kage/buhin.ts",
+        "./kage/kage.ts",
+        "font.ts",
+        "stroketype.ts",
+        "util.ts"
+    ]
+}

@@ -14,6 +14,8 @@
  *  https://github.com/soswow/fit-curves
  */
 
+import { BezierCurve, Curve } from "./curve-types.ts";
+
 /**
  * Fit one or more Bezier curves to a set of points.
  *
@@ -21,7 +23,7 @@
  * @param {Number} maxError - Tolerance, squared error between points and fitted curve
  * @returns {Array<Array<Array<Number>>>} Array of Bezier curves, where each element is [first-point, control-point-1, control-point-2, second-point] and points are [x, y]
  */
-export function fitCurve(points, maxError, progressCallback) {
+export function fitCurve(points: number[][], maxError: number): Curve {
     if (!Array.isArray(points)) {
         throw new TypeError("First argument should be an array");
     }
@@ -45,7 +47,7 @@ export function fitCurve(points, maxError, progressCallback) {
     const leftTangent = createTangent(points[1], points[0]);
     const rightTangent = createTangent(points[len - 2], points[len - 1]);
 
-    return fitCubic(points, leftTangent, rightTangent, maxError, progressCallback);
+    return fitCubic(points, leftTangent, rightTangent, maxError);
 }
 
 /**
@@ -58,7 +60,8 @@ export function fitCurve(points, maxError, progressCallback) {
  * @param {Number} error - Tolerance, squared error between points and fitted curve
  * @returns {Array<Array<Array<Number>>>} Array of Bezier curves, where each element is [first-point, control-point-1, control-point-2, second-point] and points are [x, y]
  */
-export function fitCubic_tang(points, tangents, error, progressCallback) {
+export function fitCubic_tang(points: number[][], tangents: number[][],
+                              error: number): Curve {
     const MaxIterations = 20;   //Max times to try iterating (to find an acceptable curve)
 
     var bezCurve,               //Control points of fitted Bezier curve
@@ -87,7 +90,7 @@ export function fitCubic_tang(points, tangents, error, progressCallback) {
 
     //Parameterize points, and attempt to fit curve
     u = chordLengthParameterize(points);
-    [bezCurve, maxError, splitPoint] = generateAndReport(points, u, u, leftTangent, rightTangent, progressCallback)
+    [bezCurve, maxError, splitPoint] = generateAndReport(points, u, u, leftTangent, rightTangent)
 
     if (maxError < error) {
         return [bezCurve];
@@ -102,7 +105,7 @@ export function fitCubic_tang(points, tangents, error, progressCallback) {
         for (i = 0; i < MaxIterations; i++) {
 
             uPrime = reparameterize(bezCurve, points, uPrime);
-            [bezCurve, maxError, splitPoint] = generateAndReport(points, u, uPrime, leftTangent, rightTangent, progressCallback);
+            [bezCurve, maxError, splitPoint] = generateAndReport(points, u, uPrime, leftTangent, rightTangent);
 
             if (maxError < error) {
                 return [bezCurve];
@@ -136,12 +139,12 @@ export function fitCubic_tang(points, tangents, error, progressCallback) {
           and the results take twice as many steps and milliseconds to finish,
           without looking any better than what we already have.
     */
-    beziers = beziers.concat(fitCubic_tang(points.slice(0, splitPoint + 1), tangents.slice(0, splitPoint + 1), error, progressCallback));
-    beziers = beziers.concat(fitCubic_tang(points.slice(splitPoint),        tangents.slice(splitPoint)       , error, progressCallback));
+    beziers = beziers.concat(fitCubic_tang(points.slice(0, splitPoint + 1), tangents.slice(0, splitPoint + 1), error));
+    beziers = beziers.concat(fitCubic_tang(points.slice(splitPoint),        tangents.slice(splitPoint)       , error));
     return beziers;
 };
 
-function fitCubic(points, leftTangent, rightTangent, error, progressCallback) {
+function fitCubic(points, leftTangent, rightTangent, error) {
     const MaxIterations = 20;   //Max times to try iterating (to find an acceptable curve)
 
     var bezCurve,               //Control points of fitted Bezier curve
@@ -173,7 +176,7 @@ function fitCubic(points, leftTangent, rightTangent, error, progressCallback) {
 
     //Parameterize points, and attempt to fit curve
     u = chordLengthParameterize(points);
-    [bezCurve, maxError, splitPoint] = generateAndReport(points, u, u, leftTangent, rightTangent, progressCallback)
+    [bezCurve, maxError, splitPoint] = generateAndReport(points, u, u, leftTangent, rightTangent)
 
     if (maxError < error) {
         return [bezCurve];
@@ -188,7 +191,7 @@ function fitCubic(points, leftTangent, rightTangent, error, progressCallback) {
         for (i = 0; i < MaxIterations; i++) {
 
             uPrime = reparameterize(bezCurve, points, uPrime);
-            [bezCurve, maxError, splitPoint] = generateAndReport(points, u, uPrime, leftTangent, rightTangent, progressCallback);
+            [bezCurve, maxError, splitPoint] = generateAndReport(points, u, uPrime, leftTangent, rightTangent);
 
             if (maxError < error) {
                 return [bezCurve];
@@ -237,31 +240,21 @@ function fitCubic(points, leftTangent, rightTangent, error, progressCallback) {
           and the results take twice as many steps and milliseconds to finish,
           without looking any better than what we already have.
     */
-    beziers = beziers.concat(fitCubic(points.slice(0, splitPoint + 1), leftTangent, toCenterTangent,    error, progressCallback));
-    beziers = beziers.concat(fitCubic(points.slice(splitPoint),        fromCenterTangent, rightTangent, error, progressCallback));
+    beziers = beziers.concat(fitCubic(points.slice(0, splitPoint + 1), leftTangent, toCenterTangent,    error));
+    beziers = beziers.concat(fitCubic(points.slice(splitPoint),        fromCenterTangent, rightTangent, error));
     return beziers;
 };
 
-function generateAndReport(points, paramsOrig, paramsPrime, leftTangent, rightTangent, progressCallback) {
+function generateAndReport(points, paramsOrig, paramsPrime, leftTangent, rightTangent) {
     var bezCurve, maxError, splitPoint;
 
-    bezCurve = generateBezier(points, paramsPrime, leftTangent, rightTangent, progressCallback);
+    bezCurve = generateBezier(points, paramsPrime, leftTangent, rightTangent);
     //Find max deviation of points to fitted curve.
     //Here we always use the original parameters (from chordLengthParameterize()),
     //because we need to compare the current curve to the actual source polyline,
     //and not the currently iterated parameters which reparameterize() & generateBezier() use,
     //as those have probably drifted far away and may no longer be in ascending order.
     [maxError, splitPoint] = computeMaxError(points, bezCurve, paramsOrig);
-
-    if(progressCallback) {
-        progressCallback({
-            bez: bezCurve,
-            points: points,
-            params: paramsOrig,
-            maxErr: maxError,
-            maxPoint: splitPoint,
-        });
-    }
 
     return [bezCurve, maxError, splitPoint];
 }

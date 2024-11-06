@@ -1,4 +1,5 @@
-import { Bezier } from "./bezier.js";
+import { Bezier } from "./bezier.ts";
+import { Curve } from "./curve-types.ts";
 
 /**
  * Path mainly stores an array of curves with some helper functions.
@@ -6,15 +7,13 @@ import { Bezier } from "./bezier.js";
  * of the Bezier curve.
  */
 export class Path {
-  constructor() {
-    this.curves = new Array();
-  }
+  curves: Curve;
 
   /**
    * Takes another path assumed to connect at the end or start points, and
    * connects the two while fixing orientation to that of the current path.
    */
-  connect(path) {
+  connect(path: Path): void {
     function pointsEqual(p1, p2) {
       return (p1[0] == p2[0]) && (p1[1] == p2[1]);
     }
@@ -52,7 +51,7 @@ export class Path {
    * Returns true if the start point or end point of this path is connected to
    * the start point or end point of the given path, and false otherwise.
    */
-  connectedTo(path) {
+  connectedTo(path): boolean {
     function pointsEqual(p1, p2) {
       return (p1[0] == p2[0]) && (p1[1] == p2[1]);
     }
@@ -73,8 +72,8 @@ export class Path {
   /**
    * Similar to array.toReversed(). Returns a reversed copy of the path.
    */
-  toReversed() {
-    let path = new Array();
+  toReversed(): Curve {
+    let path: Curve = new Array();
     for (let curve of this.curves) {
       path.unshift(curve.toReversed());
     }
@@ -86,7 +85,7 @@ export class Path {
    * Converts the path into an SVG command sequence (M x y Q x y, x y etc).
    * Includes only the string assigned to "d".
    */
-  toSVGSequence(precision) {
+  toSVGSequence(precision: number): string {
     function round(num, precision) {
       return parseFloat(num.toFixed(precision));
     }
