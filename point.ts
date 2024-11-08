@@ -1,55 +1,56 @@
+import { Point } from "./types.ts";
 
-export class Point {
-  x: number;
-  y: number;
-
-  constructor(_x: number, _y: number) {
-    this.x = _x;
-    this.y = _y;
+/**
+ * Some helper functions for point operations.
+ */
+export class PointOp {
+  static equal(p1: Point, p2: Point): boolean {
+    return (p1[0] == p2[0]) && (p1[1] == p2[1]);
   }
 
-  add(p: Point): void {
-    this.x += p.x;
-    this.y += p.y;
+  static add(out: Point, p1: Point, p2: Point): void {
+    out[0] = p1[0] + p2[0];
+    out[1] = p1[1] + p2[1];
   }
 
-  sub(p: Point): void {
-    this.x -= p.x;
-    this.y -= p.y;
+  static sub(out: Point, p1: Point, p2: Point): void {
+    out[0] = p1[0] - p2[0];
+    out[1] = p1[1] - p2[1];
   }
 
-  scale(s: number) {
-    this.x *= s;
-    this.y *= s;
+  static scale(out: Point, p: Point, s: number): void {
+    out[0] = p[0] * s;
+    out[1] = p[1] * s;
   }
 
   /**
-   * Moves this point towards p over a distance of dist.
+   * Moves towards destination from start over a distance of dist.
    */
-  moveTowards(p: Point, dist: number) {
-    p.sub(this);
-    try {
-      p.normalize();
+  static moveTowards(out: Point, dest: Point, start: Point, dist: number): void {
+    let dir: Point = [0, 0];
+    PointOp.sub(dir, dest, start);
 
-      p.scale(dist);
-      this.add(p);
+    if (dir[0] == 0 && dir[1] == 0) {
+      out = start;
     }
-    catch {
-      // If the magnitude of their difference is 0 they are the same.
-      return;
+    else {
+      PointOp.normalize(dir, dir);
+      PointOp.scale(dir, dir, dist);
+      PointOp.add(out, start, dir);
     }
   }
 
   /**
    * Normalizes the point. If the magnitude is 0 this function throws an error.
    */
-  normalize(): void {
-    let mag: number = Math.sqrt(this.x * this.x + this.y * this.y);
+  static normalize(out: Point, p: Point): void {
+    let mag: number = Math.sqrt(p[0] * p[0] + p[1] * p[1]);
 
     if (!mag)
       throw new Error("Magnitude is 0.");
 
-    this.x /= mag;
-    this.y /= mag;
+    out[0] = p[0] / mag;
+    out[1] = p[1] / mag;
   }
 }
+

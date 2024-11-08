@@ -2,8 +2,9 @@ import { Bezier } from "../../curve/bezier.ts";
 import { Font } from "../../font.ts";
 import { STROKETYPE, STARTTYPE, ENDTYPE } from "../../stroketype.ts";
 //import { get_dir, moved_point, get_extended_dest } from "../../util.ts";
-import { Path } from "../../curve/path.ts";
-import { Point } from "../../point.ts";
+import { PathOp } from "../../curve/path.ts";
+import { PointOp } from "../../point.ts";
+import { Curve, KAGEData, KAGEString, Path, Point } from "../../types.ts";
 
 export class GothicWeb implements Font {
   kWidth: number;
@@ -28,7 +29,7 @@ export class GothicWeb implements Font {
   /**
    * Takes an array of stroke data and returns an array of paths.
    */
-  getPaths(strokes: number[][]): Path[] {
+  getPaths(strokes: KAGEData[]): Path[] {
     let skeletons = new Array();
     for (let stroke of strokes)
       skeletons.push(this.processSkeleton(stroke));
@@ -42,8 +43,8 @@ export class GothicWeb implements Font {
   connectSkeletons(skeletons: Path[]): Path[] {
     for (let i = 0; i < skeletons.length; i++) {
       for (let j = i + 1; j < skeletons.length; j++) {
-        if (skeletons[i].connectedTo(skeletons[j])) {
-          skeletons[i].connect(skeletons[j]);
+        if (PathOp.connected(skeletons[j], skeletons[i])) {
+          PathOp.connect(skeletons[j], skeletons[i]);
           skeletons.splice(j, 1);
           j--;
         }
@@ -57,7 +58,7 @@ export class GothicWeb implements Font {
    * Convert a KAGE-styled stroke into a Bezier skeleton with some extra
    * font-specific details.
    */
-  processSkeleton(stroke: number[]): Path {
+  processSkeleton(stroke: KAGEData): Path {
     // Move the endpoint down if the stroke end is a bottom corner.
     if (stroke[0] % 100 == STROKETYPE.STRAIGHT && stroke[2] % 10 == 3) {
       stroke[6] += this.kWidth * 1;
@@ -70,21 +71,22 @@ export class GothicWeb implements Font {
 
         /* Move end point. */
 
-        let last_curve = skeleton.curves[skeleton.curves.length - 1];
-        let end_point = last_curve[last_curve.length - 1];
-        let second_end_point = last_curve[last_curve.length - 2];
-        let dir = get_dir(end_point[0] - second_end_point[0],
-                          end_point[1] - second_end_point[1]);
-        let [tx, ty] = moved_point(end_point[0], end_point[1], dir,
-                                   -this.kMage);
-        skeleton.curves[skeleton.curves.length - 1][last_curve.length - 1] = new Point(tx, ty);
+        let end_point = PathOp.getLastPoint(skeleton);
+        let txy: Point = [0, 0];
+        PointOp.moveTowards(
+          txy,
+          end_point,
+          PathOp.getKthLastPoint(skeleton, 2), // Second last point.
+          this.kMage
+        );
+        PathOp.setLastPoint(skeleton, txy);
 
         /* Add new curve. */
 
-        skeleton.curves.push([
-          new Point(tx, ty),
-          new Point(end_point[0], end_point[1]),
-          new Point(end_point[0] - 1.25 * this.kMage, end_point[1])
+        skeleton.push([
+          txy,
+          end_point,
+          [end_point[0] - 1.25 * this.kMage, end_point[1]]
         ]);
         break;
       }
@@ -92,22 +94,22 @@ export class GothicWeb implements Font {
 
         /* Move end point. */
 
-        let last_curve = skeleton.curves[skeleton.curves.length - 1];
-        let end_point = last_curve[last_curve.length - 1];
-        let second_end_point = last_curve[last_curve.length - 2];
-        let dir = get_dir(end_point[0] - second_end_point[0],
-                          end_point[1] - second_end_point[1]);
-        let [tx, ty] = moved_point(end_point[0], end_point[1], dir,
-                                   -this.kMage);
-        // Set the endpoint of the curve.
-        skeleton.curves[skeleton.curves.length - 1][last_curve.length - 1] = new Point(tx, ty);
+        let end_point = PathOp.getLastPoint(skeleton);
+        let txy: Point = [0, 0];
+        PointOp.moveTowards(
+          txy,
+          end_point,
+          PathOp.getKthLastPoint(skeleton, 2), // Second last point.
+          this.kMage
+        );
+        PathOp.setLastPoint(skeleton, txy);
 
         /* Replace last curve. */
 
-        skeleton.curves.push([
-          new Point(tx, ty),
-          new Point(end_point[0], end_point[1]),
-          new Point(end_point[0], end_point[1] - 1.25 * this.kMage)
+        skeleton.push([
+          txy,
+          end_point,
+          [end_point[0], end_point[1] - 1.25 * this.kMage]
         ]);
         break;
       }
@@ -127,22 +129,19 @@ export class GothicWeb implements Font {
       return null;
     }
 
-    let skeleton: Path = new Path();
+    let skeleton: Path = [];
+    let p1: Point = [stroke[3], stroke[4]];
+    let p2: Point = [stroke[5], stroke[6]];
+    let p3: Point = [stroke[7], stroke[8]];
+    let p4: Point = [stroke[9], stroke[10]];
 
     switch (stroke[0]) {
       case STROKETYPE.STRAIGHT: {
-        skeleton.curves.push([
-          new Point(stroke[3], stroke[4]),
-          new Point(stroke[5], stroke[6])
-        ]);
+        skeleton.push([p1, p2]);
         break;
       }
       case STROKETYPE.CURVE: {
-        skeleton.curves.push([
-          new Point(stroke[3], stroke[4]),
-          new Point(stroke[5], stroke[6]),
-          new Point(stroke[7], stroke[8])
-        ]);
+        skeleton.push([p1, p2, p3]);
         break;
       }
       case STROKETYPE.BENDING:
@@ -151,51 +150,24 @@ export class GothicWeb implements Font {
         if (stroke[0] == STROKETYPE.BENDING_ROUND)
           bend_amt = 5;
 
-        let x1 = stroke[3];
-        let y1 = stroke[4];
-        let x2 = stroke[5];
-        let y2 = stroke[6];
-        let x3 = stroke[7];
-        let y3 = stroke[8];
-
         // Create points around x2, y2 for the curve.
-        let [tx1, ty1] = get_extended_dest(x2, y2, x1, y1, -this.kMage * bend_amt);
-        let [tx2, ty2] = get_extended_dest(x2, y2, x3, y3, -this.kMage * bend_amt);
+        let t1: Point = [0, 0];
+        let t2: Point = [0, 0];
+        PointOp.moveTowards(t1, p1, p2, this.kMage * bend_amt);
+        PointOp.moveTowards(t2, p3, p2, this.kMage * bend_amt);
 
-        skeleton.curves.push([
-          new Point(x1, y1),
-          new Point(tx1, ty1)
-        ]);
-        skeleton.curves.push([
-          new Point(tx1, ty1),
-          new Point(x2, y2),
-          new Point(tx2, ty2)
-        ]);
-        skeleton.curves.push([
-          new Point(tx2, ty2),
-          new Point(x3, y3)
-        ]);
+        skeleton.push([p1, t1]);
+        skeleton.push([t1, p2, t2]);
+        skeleton.push([t2, p3]);
         break;
       }
       case STROKETYPE.BEZIER: {
-        skeleton.curves.push([
-          new Point(stroke[3], stroke[4]),
-          new Point(stroke[5], stroke[6]),
-          new Point(stroke[7], stroke[8]),
-          new Point(stroke[9], stroke[10])
-        ]);
+        skeleton.push([p1, p2, p3, p4]);
         break;
       }
-      case STROKETYPE.BEZIER: {
-        skeleton.curves.push([
-          new Point(stroke[3], stroke[4]),
-          new Point(stroke[5], stroke[6])
-        ]);
-        skeleton.curves.push([
-          new Point(stroke[5], stroke[6]),
-          new Point(stroke[7], stroke[8]),
-          new Point(stroke[9], stroke[10])
-        ]);
+      case STROKETYPE.VCURVE: {
+        skeleton.push([p1, p2]);
+        skeleton.push([p2, p3, p4]);
         break;
       }
       default:
@@ -212,7 +184,7 @@ export class GothicWeb implements Font {
 
     for(let path of paths) {
       buffer += "<path d=\"";
-      buffer += path.toSVGSequence(this.precision);
+      buffer += PathOp.toSVGSequence(path, this.precision);
       buffer += "\" stroke-width=\"" + this.kWidth;
       buffer += "\" stroke-linecap=\"" + this.lineCap;
       buffer += "\" stroke-linejoin=\"" + this.lineJoin;

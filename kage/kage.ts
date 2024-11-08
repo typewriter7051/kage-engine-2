@@ -1,8 +1,9 @@
 import { Buhin } from "./buhin.ts";
 import { STROKETYPE } from "../stroketype.ts";
 import { getBoundingBox, stretch } from "../util.ts";
-import { Path } from "../curve/path.ts";
+import { PathOp } from "../curve/path.ts";
 import { Font } from "../font.ts";
+import { KAGEData, KAGEString, Path } from "../types.ts";
 
 export class Kage {
   kBuhin: Buhin;
@@ -18,7 +19,7 @@ export class Kage {
   }
 
   /**
-   * Given a character or composition sequence (e.g. ) return the generated SVG.
+   * Given a character or composition sequence (e.g. "⿰女子") return the generated SVG.
    */
   char2SVG(str: string): string {
     let ids = Kage.str2IDS(str);
@@ -48,12 +49,13 @@ export class Kage {
     return this.kFont.generateSVG(paths);
   }
 
-  getStrokes(glyphData: string): number[][] {
-    var strokes = new Array();
-    var textData = glyphData.split("$");
+  getStrokes(glyphData: string): KAGEData[] {
+    let strokes: KAGEData[] = new Array();
+    let textData = glyphData.split("$");
+
     for (let i = 0; i < textData.length; i++) {
-      var columns_str = textData[i].split(":");
-      var columns: number[];
+      let columns_str = textData[i].split(":");
+      let columns: number[];
       for (let j = 0; j < columns_str.length; j++)
         columns.push(Number(columns_str));
 
@@ -71,9 +73,9 @@ export class Kage {
           Math.floor(columns[9]),
           Math.floor(columns[10])
         ]);
-
-      } else {
-        var buhin = this.kBuhin.search(columns[7].toString());
+      }
+      else {
+        let buhin = this.kBuhin.search(columns[7].toString());
         if (buhin != "") {
           strokes = strokes.concat(this.getStrokesOfBuhin(buhin,
             Math.floor(columns[3]),
@@ -92,7 +94,7 @@ export class Kage {
     return strokes;
   }
 
-  getStrokesOfBuhin(buhin: string, x1, y1, x2, y2, sx, sy, sx2, sy2): number[][] {
+  getStrokesOfBuhin(buhin: string, x1, y1, x2, y2, sx, sy, sx2, sy2): KAGEData[] {
     var temp = this.getStrokes(buhin);
     var result = new Array();
     var box = getBoundingBox(temp);
@@ -181,7 +183,7 @@ export class Kage {
 
   /**
    * Convert a string input (e.g. "⿰女子") into the IDS format. This function
-   * should not take in nested compositions like "⿰糹⿱土口".
+   * should not take in unnecessarily nested compositions like "⿰糹⿱土口".
    */
   static str2IDS(input: string): string {
     var result = new Array();
@@ -218,7 +220,7 @@ export class Kage {
    * Given an IDS string, generate the KAGE glyph data with adjusted
    * proportions.
    */
-  generateGlyphData(ids: string): string {
+  generateGlyphData(ids: string): KAGEString {
     let components = ids.split("-");
 
     // Ensure all dependencies are generated.

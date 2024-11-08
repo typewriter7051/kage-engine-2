@@ -1,11 +1,11 @@
 {
     "compilerOptions": {
         "allowImportingTsExtensions": true,
-        "noEmit": true
+        "noEmit": true,
+        "lib": ["ESNext"]
     },
     "files": [
         "./curve/bezier.ts",
-        "./curve/curve-types.ts",
         "./curve/fit-curve.ts",
         "./curve/path.ts",
         "./fonts/gothic-web/gothic-web.ts",
@@ -13,6 +13,7 @@
         "./kage/kage.ts",
         "font.ts",
         "stroketype.ts",
+        "types.ts",
         "util.ts"
     ]
 }

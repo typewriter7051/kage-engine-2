@@ -14,7 +14,7 @@
  *  https://github.com/soswow/fit-curves
  */
 
-import { BezierCurve, Curve } from "./curve-types.ts";
+import { Curve, Path, Point } from "../types.ts";
 
 /**
  * Fit one or more Bezier curves to a set of points.
@@ -23,7 +23,7 @@ import { BezierCurve, Curve } from "./curve-types.ts";
  * @param {Number} maxError - Tolerance, squared error between points and fitted curve
  * @returns {Array<Array<Array<Number>>>} Array of Bezier curves, where each element is [first-point, control-point-1, control-point-2, second-point] and points are [x, y]
  */
-export function fitCurve(points: number[][], maxError: number): Curve {
+export function fitCurve(points: Point[], maxError: number): Path {
     if (!Array.isArray(points)) {
         throw new TypeError("First argument should be an array");
     }
@@ -60,8 +60,8 @@ export function fitCurve(points: number[][], maxError: number): Curve {
  * @param {Number} error - Tolerance, squared error between points and fitted curve
  * @returns {Array<Array<Array<Number>>>} Array of Bezier curves, where each element is [first-point, control-point-1, control-point-2, second-point] and points are [x, y]
  */
-export function fitCubic_tang(points: number[][], tangents: number[][],
-                              error: number): Curve {
+export function fitCubic_tang(points: Point[], tangents: Point[],
+                              error: number): Path {
     const MaxIterations = 20;   //Max times to try iterating (to find an acceptable curve)
 
     var bezCurve,               //Control points of fitted Bezier curve

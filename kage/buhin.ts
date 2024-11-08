@@ -1,3 +1,5 @@
+import { KAGEString } from "../types.ts";
+
 /**
  * This class stores stroke data from a dump file (usually dump.txt) and
  * provides helper functions to break down a component into fundamental
@@ -10,15 +12,15 @@ export class Buhin {
     this.hash = {};
   }
 
-  set(name: string, data: string): void {
+  set(name: string, data: KAGEString): void {
     this.hash[name] = data;
   }
 
-  push(name: string, data: string): void {
+  push(name: string, data: KAGEString): void {
     this.set(name, data);
   }
 
-  search(name: string): string {
+  search(name: string): KAGEString {
     if(this.hash[name])
       return this.hash[name];
 

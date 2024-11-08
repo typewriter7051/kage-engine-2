@@ -1,49 +1,66 @@
 import { Bezier } from "./bezier.ts";
-import { Curve } from "./curve-types.ts";
+import { CurveOp } from "./curve.ts";
+import { PointOp } from "../point.ts";
+import { Curve, Path, Point } from "../types.ts";
 
 /**
  * Path mainly stores an array of curves with some helper functions.
  * Each curve is an array of 2-4 points where the length denotes the degree
  * of the Bezier curve.
  */
-export class Path {
-  curves: Curve;
+export class PathOp {
+  static getLastPoint(p: Path): Point {
+    let last_curve: Curve = p[p.length - 1];
+    return last_curve[last_curve.length - 1];
+  }
+
+  static setLastPoint(p: Path, pt: Point): void {
+    let last_curve: Curve = p[p.length - 1];
+    p[p.length - 1][last_curve.length - 1] = pt;
+  }
+
+  static getKthLastPoint(p: Path, k: number): Point {
+    let last_curve: Curve = p[p.length - 1];
+    if (k < 1 || k > last_curve.length)
+      throw new Error("Invalid value for k!");
+
+    return last_curve[last_curve.length - k];
+  }
+
+  static setKthLastPoint(p: Path, k: number, pt: Point): void {
+    let last_curve: Curve = p[p.length - 1];
+    if (k < 1 || k > last_curve.length)
+      throw new Error("Invalid value for k!");
+
+    p[p.length - 1][last_curve.length - k] = pt;
+  }
 
   /**
-   * Takes another path assumed to connect at the end or start points, and
-   * connects the two while fixing orientation to that of the current path.
+   * Connects p1 to p2 while maintaining orientation of p2.
    */
-  connect(path: Path): void {
-    function pointsEqual(p1, p2) {
-      return (p1[0] == p2[0]) && (p1[1] == p2[1]);
-    }
-
-    if (this.curves.length == 0) {
-      this.curves = path.curves;
+  static connect(p1: Path, p2: Path): void {
+    if (p2.length == 0) {
+      p2 = p1;
       return;
     }
 
-    // lc = last curve.
-    let path_lc = path.curves[path.curves.length - 1];
-    let this_lc = this.curves[this.curves.length - 1];
-
     // sp = start point, ep = end point.
-    let path_sp = path.curves[0][0];
-    let path_ep = path_lc[path_lc.length - 1];
-    let this_sp = this.curves[0][0];
-    let this_ep = this_lc[this_lc.length - 1];
+    let p1_sp: Point = p1[0][0];
+    let p1_ep: Point = PathOp.getLastPoint(p1);
+    let p2_sp: Point = p2[0][0];
+    let p2_ep: Point = PathOp.getLastPoint(p2);
 
-    if (pointsEqual(this_sp, path_sp)) {
-      this.curves = path.toReversed().concat(this.curves);
+    if (PointOp.equal(p1_sp, p2_sp)) {
+      p2 = p1.toReversed().concat(p2);
     }
-    else if (pointsEqual(this_sp, path_ep)) {
-      this.curves = path.curves.concat(this.curves);
+    else if (PointOp.equal(p1_sp, p2_ep)) {
+      p2 = p2.concat(p1);
     }
-    else if (pointsEqual(this_ep, path_sp)) {
-      this.curves = this.curves.concat(path.curves);
+    else if (PointOp.equal(p1_ep, p2_sp)) {
+      p2 = p1.concat(p2);
     }
-    else if (pointsEqual(this_ep, path_ep)) {
-      this.curves = this.curves.concat(path.curves.toReversed());
+    else if (PointOp.equal(p1_ep, p2_ep)) {
+      p2 = p2.concat(p1.toReversed());
     }
   }
 
@@ -51,32 +68,27 @@ export class Path {
    * Returns true if the start point or end point of this path is connected to
    * the start point or end point of the given path, and false otherwise.
    */
-  connectedTo(path): boolean {
-    function pointsEqual(p1, p2) {
-      return (p1[0] == p2[0]) && (p1[1] == p2[1]);
-    }
+  static connected(p1: Path, p2: Path): boolean {
+    // sp = start point, ep = end point.
+    let p1_sp: Point = p1[0][0];
+    let p1_ep: Point = PathOp.getLastPoint(p1);
+    let p2_sp: Point = p2[0][0];
+    let p2_ep: Point = PathOp.getLastPoint(p2);
 
-    let this_start = this.curves[0][0];
-    let path_start = path.curves[0][0];
-    let this_curve = this.curves[this.curves.length - 1];
-    let path_curve = path.curves[path.curves.length - 1];
-    let this_end = this_curve[this_curve.length - 1];
-    let path_end = path_curve[path_curve.length - 1];
-
-    return pointsEqual(this_start, path_start) ||
-           pointsEqual(this_start, path_end) ||
-           pointsEqual(this_end, path_start) ||
-           pointsEqual(this_end, path_end);
+    return PointOp.equal(p1_sp, p2_sp) ||
+           PointOp.equal(p1_sp, p2_ep) ||
+           PointOp.equal(p1_ep, p2_sp) ||
+           PointOp.equal(p1_ep, p2_ep);
   }
 
   /**
    * Similar to array.toReversed(). Returns a reversed copy of the path.
    */
-  toReversed(): Curve {
-    let path: Curve = new Array();
-    for (let curve of this.curves) {
-      path.unshift(curve.toReversed());
-    }
+  static toReversed(p: Path): Path {
+    let path: Path = new Array();
+
+    for (let curve of p)
+      path.unshift(CurveOp.toReversed(curve));
 
     return path;
   }
@@ -85,20 +97,20 @@ export class Path {
    * Converts the path into an SVG command sequence (M x y Q x y, x y etc).
    * Includes only the string assigned to "d".
    */
-  toSVGSequence(precision: number): string {
+  static toSVGSequence(p: Path, precision: number): string {
     function round(num, precision) {
       return parseFloat(num.toFixed(precision));
     }
 
     let buffer = "";
 
-    let x = this.curves[0][0][0];
-    let y = this.curves[0][0][1];
+    let x = p[0][0][0];
+    let y = p[0][0][1];
 
     buffer += "M";
     buffer += round(x, precision) + "," + round(y, precision) + " ";
 
-    for (let curve of this.curves) {
+    for (let curve of p) {
       switch (curve.length) {
         case 2: { // Line.
           buffer += "L";

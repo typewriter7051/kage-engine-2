@@ -1,6 +1,7 @@
 import { rad_to_vector, get_rad } from "../util.ts";
 import { fitCurve } from "./fit-curve.ts";
-import { BezierCurve, Curve } from "./curve-types.ts";
+import { Curve, Path, Point } from "../types.ts";
+import { PointOp } from "../point.ts";
 
 export class Bezier {
   static bezier_steps: number = 200;
@@ -11,7 +12,7 @@ export class Bezier {
    * a corresponding value.
    */
   static generalBezier(x_fn: (a: number) => number, y_fn: (a: number) => number,
-                       width_fn: (a: number) => number): Curve[] {
+                       width_fn: (a: number) => number): Path[] {
     var a1 = [];
     var a2 = [];
 
@@ -27,11 +28,12 @@ export class Bezier {
       const vx = new_x - x;
       const vy = new_y - y;
 
-      [ia, ib] = unit_normal_vector(vx, vy);
+      let norm: Point = [ia, ib];
+      PointOp.normalize(norm, [vx, vy]);
       const deltad = width_fn(t);
-      ia = ia * deltad;
-      ib = ib * deltad;
+      PointOp.scale(norm, norm, deltad);
       
+      [ia, ib] = norm;
       a1.push([x - ia, y - ib]);
       a2.push([x + ia, y + ib]);
 
@@ -49,7 +51,7 @@ export class Bezier {
     return [curve1, curve2];
   }
 
-  static generalBezier2(x_fun, y_fun, dx_fun, dy_fun, width_func, width_func_d, dir_func): Curve[] {
+  static generalBezier2(x_fun, y_fun, dx_fun, dy_fun, width_func, width_func_d, dir_func): Path[] {
     //offset vector (ia, ib) is calculated with dir_func
     var a1 = [];
     var a2 = [];
@@ -89,7 +91,7 @@ export class Bezier {
    * the length of the array. For example [[0, 0], [10, 20]] is a line and
    * [[2, 4], [10, 10], [20, 10]] is a quadratic Bezier.
    */
-  static thickenCurve(curve: BezierCurve, width_fn): Curve[] {
+  static thickenCurve(curve: Curve, width_fn): Path[] {
     var x_fn, y_fn;
     switch (curve.length) {
       case 2: {
