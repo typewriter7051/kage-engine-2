@@ -93,7 +93,7 @@ export class Kage {
 
   getStrokesOfBuhin(buhin: string, x1, y1, x2, y2, sx, sy, sx2, sy2): KAGEData[] {
     let strokes = this.getStrokes(buhin);
-    let result = new Array();
+    let result: KAGEData[] = [];
     let box = getBoundingBox(strokes);
 
     if (sx != 0 || sy != 0) {
