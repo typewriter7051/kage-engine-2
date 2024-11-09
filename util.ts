@@ -380,7 +380,7 @@ export function stretch(dp, sp, p, min, max) { // integer
 }
 
 export function getBoundingBox(strokes) { // minX, minY, maxX, maxY
-  var a: {minX: number, minY: number, maxX: number, maxY: number};
+  var a = {minX: 0, minY: 0, maxX: 0, maxY: 0};
   a.minX = 200;
   a.minY = 200;
   a.maxX = 0;

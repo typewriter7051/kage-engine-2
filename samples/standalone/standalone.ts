@@ -1,11 +1,9 @@
 // KAGE engine sample script for JavaScript engine
 //
-// % js -m standalone.js > result.svg (SpiderMonkey)
-// % java -jar js.jar standalone.js > result.svg (Rhino untested)
-// % node standalone.js > result.svg (NodeJS)
+// % node standalone.ts > result.svg (NodeJS)
 
-import { Kage } from "../../kage/kage.js";
-import { GothicWeb } from "../../fonts/gothic-web/gothic-web.js";
+import { Kage } from "../../kage/kage";
+import { GothicWeb } from "../../fonts/gothic-web/gothic-web";
 
 let gothicWeb = new GothicWeb(5);
 gothicWeb.lineJoin = "round";
@@ -36,6 +34,7 @@ print(polygons.generateSVG(false));
 // New method.
 
 let paths = kage.IDS2Paths("u6c38");
-//print(kage.generateSVG(paths));
+
+// @ts-expect-error
 console.log(kage.generateSVG(paths));
 

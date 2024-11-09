@@ -1,5 +1,5 @@
 import { KAGEData, Path } from "./types";
-import { PathOp } from "./curve/path.ts";
+import { PathOp } from "./curve/path";
 
 /**
  * Abstract font base class. The main responsibility of the Font class is to

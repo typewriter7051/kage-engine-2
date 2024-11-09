@@ -1,9 +1,9 @@
-import { Buhin } from "./buhin.ts";
-import { STROKETYPE } from "../stroketype.ts";
-import { getBoundingBox, stretch } from "../util.ts";
-import { PathOp } from "../curve/path.ts";
-import { Font } from "../font.ts";
-import { KAGEData, KAGEString, Path } from "../types.ts";
+import { Buhin } from "./buhin";
+import { STROKETYPE } from "../stroketype";
+import { getBoundingBox, stretch } from "../util";
+import { PathOp } from "../curve/path";
+import { Font } from "../font";
+import { KAGEData, KAGEString, Path } from "../types";
 
 export class Kage {
   kBuhin: Buhin;
@@ -50,42 +50,39 @@ export class Kage {
   }
 
   getStrokes(glyphData: string): KAGEData[] {
-    let strokes: KAGEData[] = new Array();
-    let textData = glyphData.split("$");
+    let strokes: KAGEData[] = [];
+    let strokes_str = glyphData.split("$");
 
-    for (let i = 0; i < textData.length; i++) {
-      let columns_str = textData[i].split(":");
-      let columns: number[];
-      for (let j = 0; j < columns_str.length; j++)
-        columns.push(Number(columns_str));
+    for (let stroke_str of strokes_str) {
+      let stroke_strarr: string[] = stroke_str.split(":");
 
-      if (Math.floor(columns[0]) != STROKETYPE.REFERENCE) {
+      if (+stroke_strarr[0] != STROKETYPE.REFERENCE) {
         strokes.push([
-          Math.floor(columns[0]),
-          Math.floor(columns[1]),
-          Math.floor(columns[2]),
-          Math.floor(columns[3]),
-          Math.floor(columns[4]),
-          Math.floor(columns[5]),
-          Math.floor(columns[6]),
-          Math.floor(columns[7]),
-          Math.floor(columns[8]),
-          Math.floor(columns[9]),
-          Math.floor(columns[10])
+          +stroke_strarr[0],
+          +stroke_strarr[1],
+          +stroke_strarr[2],
+          +stroke_strarr[3],
+          +stroke_strarr[4],
+          +stroke_strarr[5],
+          +stroke_strarr[6],
+          +stroke_strarr[7],
+          +stroke_strarr[8],
+          +stroke_strarr[9],
+          +stroke_strarr[10]
         ]);
       }
       else {
-        let buhin = this.kBuhin.search(columns[7].toString());
+        let buhin = this.kBuhin.search(stroke_strarr[7]);
         if (buhin != "") {
           strokes = strokes.concat(this.getStrokesOfBuhin(buhin,
-            Math.floor(columns[3]),
-            Math.floor(columns[4]),
-            Math.floor(columns[5]),
-            Math.floor(columns[6]),
-            Math.floor(columns[1]),
-            Math.floor(columns[2]),
-            Math.floor(columns[9]),
-            Math.floor(columns[10]))
+            +stroke_strarr[3],
+            +stroke_strarr[4],
+            +stroke_strarr[5],
+            +stroke_strarr[6],
+            +stroke_strarr[1],
+            +stroke_strarr[2],
+            +stroke_strarr[9],
+            +stroke_strarr[10])
           );
         }
       }
@@ -95,9 +92,9 @@ export class Kage {
   }
 
   getStrokesOfBuhin(buhin: string, x1, y1, x2, y2, sx, sy, sx2, sy2): KAGEData[] {
-    var temp = this.getStrokes(buhin);
-    var result = new Array();
-    var box = getBoundingBox(temp);
+    let strokes = this.getStrokes(buhin);
+    let result = new Array();
+    let box = getBoundingBox(strokes);
 
     if (sx != 0 || sy != 0) {
       if (sx > 100) {
@@ -108,32 +105,32 @@ export class Kage {
       }
     }
 
-    for (var i = 0; i < temp.length; i++) {
+    for (var i = 0; i < strokes.length; i++) {
       if (sx != 0 || sy != 0) {
-        temp[i][3] = stretch(sx, sx2, temp[i][3], box.minX, box.maxX);
-        temp[i][4] = stretch(sy, sy2, temp[i][4], box.minY, box.maxY);
-        temp[i][5] = stretch(sx, sx2, temp[i][5], box.minX, box.maxX);
-        temp[i][6] = stretch(sy, sy2, temp[i][6], box.minY, box.maxY);
+        strokes[i][3] = stretch(sx, sx2, strokes[i][3], box.minX, box.maxX);
+        strokes[i][4] = stretch(sy, sy2, strokes[i][4], box.minY, box.maxY);
+        strokes[i][5] = stretch(sx, sx2, strokes[i][5], box.minX, box.maxX);
+        strokes[i][6] = stretch(sy, sy2, strokes[i][6], box.minY, box.maxY);
 
-        if (temp[i][0] != STROKETYPE.REFERENCE) {
-          temp[i][7] = stretch(sx, sx2, temp[i][7], box.minX, box.maxX);
-          temp[i][8] = stretch(sy, sy2, temp[i][8], box.minY, box.maxY);
-          temp[i][9] = stretch(sx, sx2, temp[i][9], box.minX, box.maxX);
-          temp[i][10] = stretch(sy, sy2, temp[i][10], box.minY, box.maxY);
+        if (strokes[i][0] != STROKETYPE.REFERENCE) {
+          strokes[i][7] = stretch(sx, sx2, strokes[i][7], box.minX, box.maxX);
+          strokes[i][8] = stretch(sy, sy2, strokes[i][8], box.minY, box.maxY);
+          strokes[i][9] = stretch(sx, sx2, strokes[i][9], box.minX, box.maxX);
+          strokes[i][10] = stretch(sy, sy2, strokes[i][10], box.minY, box.maxY);
         }
       }
 
-      result.push([temp[i][0],
-        temp[i][1],
-        temp[i][2],
-        x1 + temp[i][3] * (x2 - x1) / 200,
-        y1 + temp[i][4] * (y2 - y1) / 200,
-        x1 + temp[i][5] * (x2 - x1) / 200,
-        y1 + temp[i][6] * (y2 - y1) / 200,
-        x1 + temp[i][7] * (x2 - x1) / 200,
-        y1 + temp[i][8] * (y2 - y1) / 200,
-        x1 + temp[i][9] * (x2 - x1) / 200,
-        y1 + temp[i][10] * (y2 - y1) / 200]);
+      result.push([strokes[i][0],
+        strokes[i][1],
+        strokes[i][2],
+        x1 + strokes[i][3] * (x2 - x1) / 200,
+        y1 + strokes[i][4] * (y2 - y1) / 200,
+        x1 + strokes[i][5] * (x2 - x1) / 200,
+        y1 + strokes[i][6] * (y2 - y1) / 200,
+        x1 + strokes[i][7] * (x2 - x1) / 200,
+        y1 + strokes[i][8] * (y2 - y1) / 200,
+        x1 + strokes[i][9] * (x2 - x1) / 200,
+        y1 + strokes[i][10] * (y2 - y1) / 200]);
 
     }
 
@@ -214,6 +211,7 @@ export class Kage {
    */
   decomposeCharIDS(ids: string): string {
     /* TODO */
+    return "";
   }
 
   /**
@@ -232,5 +230,6 @@ export class Kage {
     }
 
     /* TODO: Take dependency components and adjust them. */
+    return "";
   }
 }

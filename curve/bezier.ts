@@ -1,7 +1,7 @@
-import { rad_to_vector, get_rad } from "../util.ts";
-import { fitCurve } from "./fit-curve.ts";
-import { Curve, Path, Point } from "../types.ts";
-import { PointOp } from "../point.ts";
+import { rad_to_vector, get_rad } from "../util";
+import { fitCurve } from "./fit-curve";
+import { Curve, Path, Point } from "../types";
+import { PointOp } from "../point";
 
 export class Bezier {
   static bezier_steps: number = 200;

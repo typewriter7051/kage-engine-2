@@ -1,7 +1,7 @@
-import { Bezier } from "./bezier.ts";
-import { CurveOp } from "./curve.ts";
-import { PointOp } from "../point.ts";
-import { Curve, Path, Point } from "../types.ts";
+import { Bezier } from "./bezier";
+import { CurveOp } from "./curve";
+import { PointOp } from "../point";
+import { Curve, Path, Point } from "../types";
 
 /**
  * Path mainly stores an array of curves with some helper functions.
@@ -38,10 +38,9 @@ export class PathOp {
   /**
    * Connects p1 to p2 while maintaining orientation of p2.
    */
-  static connect(p1: Path, p2: Path): void {
+  static connect(p1: Path, p2: Path): Path {
     if (p2.length == 0) {
-      p2 = p1;
-      return;
+      return p1;
     }
 
     // sp = start point, ep = end point.
@@ -51,16 +50,16 @@ export class PathOp {
     let p2_ep: Point = PathOp.getLastPoint(p2);
 
     if (PointOp.equal(p1_sp, p2_sp)) {
-      p2 = p1.toReversed().concat(p2);
+      return PathOp.toReversed(p1).concat(p2);
     }
     else if (PointOp.equal(p1_sp, p2_ep)) {
-      p2 = p2.concat(p1);
+      return p2.concat(p1);
     }
     else if (PointOp.equal(p1_ep, p2_sp)) {
-      p2 = p1.concat(p2);
+      return p1.concat(p2);
     }
     else if (PointOp.equal(p1_ep, p2_ep)) {
-      p2 = p2.concat(p1.toReversed());
+      return p2.concat(PathOp.toReversed(p1));
     }
   }
 

@@ -1,4 +1,4 @@
-import { KAGEString } from "../types.ts";
+import { KAGEString } from "../types";
 
 /**
  * This class stores stroke data from a dump file (usually dump.txt) and

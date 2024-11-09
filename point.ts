@@ -1,4 +1,4 @@
-import { Point } from "./types.ts";
+import { Point } from "./types";
 
 /**
  * Some helper functions for point operations.

@@ -1,10 +1,10 @@
-import { Bezier } from "../../curve/bezier.ts";
-import { Font } from "../../font.ts";
-import { STROKETYPE, STARTTYPE, ENDTYPE } from "../../stroketype.ts";
-//import { get_dir, moved_point, get_extended_dest } from "../../util.ts";
-import { PathOp } from "../../curve/path.ts";
-import { PointOp } from "../../point.ts";
-import { Curve, KAGEData, KAGEString, Path, Point } from "../../types.ts";
+import { Bezier } from "../../curve/bezier";
+import { Font } from "../../font";
+import { STROKETYPE, STARTTYPE, ENDTYPE } from "../../stroketype";
+//import { get_dir, moved_point, get_extended_dest } from "../../util";
+import { PathOp } from "../../curve/path";
+import { PointOp } from "../../point";
+import { Curve, KAGEData, KAGEString, Path, Point } from "../../types";
 
 export class GothicWeb implements Font {
   kWidth: number;
@@ -30,7 +30,7 @@ export class GothicWeb implements Font {
    * Takes an array of stroke data and returns an array of paths.
    */
   getPaths(strokes: KAGEData[]): Path[] {
-    let skeletons = new Array();
+    let skeletons: Path[] = [];
     for (let stroke of strokes)
       skeletons.push(this.processSkeleton(stroke));
 
@@ -43,8 +43,8 @@ export class GothicWeb implements Font {
   connectSkeletons(skeletons: Path[]): Path[] {
     for (let i = 0; i < skeletons.length; i++) {
       for (let j = i + 1; j < skeletons.length; j++) {
-        if (PathOp.connected(skeletons[j], skeletons[i])) {
-          PathOp.connect(skeletons[j], skeletons[i]);
+        if (PathOp.connected(skeletons[i], skeletons[j])) {
+          skeletons[i] = PathOp.connect(skeletons[i], skeletons[j]);
           skeletons.splice(j, 1);
           j--;
         }
@@ -64,7 +64,7 @@ export class GothicWeb implements Font {
       stroke[6] += this.kWidth * 1;
     }
 
-    let skeleton = this.baseSkeleton(stroke);
+    let skeleton: Path = this.baseSkeleton(stroke);
 
     switch (stroke[2]) {
       case ENDTYPE.TURN_LEFT: {
@@ -124,7 +124,7 @@ export class GothicWeb implements Font {
   /**
    * Convert a KAGE-styled stroke into a basic Path skeleton.
    */
-  baseSkeleton(stroke: number[]): Path {
+  baseSkeleton(stroke: KAGEData): Path {
     if (typeof stroke === "undefined" || stroke == null) {
       return null;
     }
@@ -171,7 +171,9 @@ export class GothicWeb implements Font {
         break;
       }
       default:
-        break;
+        let str: string = "Invalid stroke type: " + stroke[0].toString();
+        str += "\nstroke: " + JSON.stringify(stroke);
+        throw new Error(str);
         return null;
     }
 
@@ -180,16 +182,20 @@ export class GothicWeb implements Font {
 
   generateSVG(paths: Path[]): string {
     let buffer = "";
-    buffer += "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" version=\"1.1\" baseProfile=\"full\" viewBox=\"0 0 200 200\" width=\"200\" height=\"200\">\n";
+    buffer += "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" version=\"1.1";
+    buffer += "\" baseProfile=\"full";
+    buffer += "\" viewBox=\"0 0 200 200";
+    buffer += "\" width=\"200\" height=\"200";
+    buffer += "\" stroke-linecap=\"" + this.lineCap;
+    buffer += "\" stroke-linejoin=\"" + this.lineJoin;
+    buffer += "\" fill=\"" + "transparent";
+    buffer += "\" stroke=\"" + "black";
+    buffer += "\" >\n";
 
     for(let path of paths) {
       buffer += "<path d=\"";
       buffer += PathOp.toSVGSequence(path, this.precision);
       buffer += "\" stroke-width=\"" + this.kWidth;
-      buffer += "\" stroke-linecap=\"" + this.lineCap;
-      buffer += "\" stroke-linejoin=\"" + this.lineJoin;
-      buffer += "\" fill=\"" + "transparent";
-      buffer += "\" stroke=\"" + "black";
       buffer += "\" />\n";
     }
 

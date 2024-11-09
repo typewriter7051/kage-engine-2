@@ -1,4 +1,4 @@
-import { Curve } from "../types.ts";
+import { Curve } from "../types";
 
 export class CurveOp {
   static toReversed(c: Curve): Curve {

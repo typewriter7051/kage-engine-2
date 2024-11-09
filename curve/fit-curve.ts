@@ -14,7 +14,7 @@
  *  https://github.com/soswow/fit-curves
  */
 
-import { Curve, Path, Point } from "../types.ts";
+import { Curve, Path, Point } from "../types";
 
 /**
  * Fit one or more Bezier curves to a set of points.
