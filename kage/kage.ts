@@ -19,6 +19,17 @@ export class Kage {
   }
 
   /**
+   * Applies font-specific overrides to loaded buhin. Only call this function
+   * after loading the database!
+   */
+  applyFontOverrides() {
+    let overrides = this.kFont.getOverrides();
+    for (let key in Object.keys(overrides)) {
+      this.kBuhin[key] = overrides[key];
+    }
+  }
+
+  /**
    * Given a character or composition sequence (e.g. "⿰女子") return the generated SVG.
    */
   char2SVG(str: string): string {

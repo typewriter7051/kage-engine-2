@@ -13,6 +13,14 @@ INPUT_FILE_PATH = './dump_newest_only.txt'
 OUTPUT_FILE_PATH = './dump_reduced.csv'
 
 """
+Only keep characters that do not reference other characters. This is used when
+other characters are going to be generated.
+
+Enabling this significantly reduces the number of entries saved.
+"""
+FUNDAMENTAL_ONLY = True
+
+"""
 Only keep the standard CJK Unified Ideographs.
 
 Enabling this significantly reduces the number of entries saved.
@@ -161,20 +169,24 @@ cur_time = time.time()
 print('Filtering entries...')
 
 for entry in entries.keys():
+    if FUNDAMENTAL_ONLY:
+        if re.search('99', entries[entry][1]):
+            continue
+
     if CJK_ONLY:
                 # CJK Unified Ideographs.
         if not ((entry > 'u4e00' and entry < 'u9fff') or
                 # Extention A.
-                #(entry > 'u3400' and entry < 'u4dbf') or
+                (entry > 'u3400' and entry < 'u4dbf') or
                 # Extention B and so on.
-                #(entry > 'u20000' and entry < 'u2a6df') or
-                #(entry > 'u2a700' and entry < 'u2b73f') or
-                #(entry > 'u2b740' and entry < 'u2b81f') or
-                #(entry > 'u2b820' and entry < 'u2ceaf') or
-                #(entry > 'u2ceb0' and entry < 'u2ebef') or
-                #(entry > 'u30000' and entry < 'u3134f') or
+                (entry > 'u20000' and entry < 'u2a6df') or
+                (entry > 'u2a700' and entry < 'u2b73f') or
+                (entry > 'u2b740' and entry < 'u2b81f') or
+                (entry > 'u2b820' and entry < 'u2ceaf') or
+                (entry > 'u2ceb0' and entry < 'u2ebef') or
+                (entry > 'u30000' and entry < 'u3134f') or
                 # Extention H.
-                #(entry > 'u31350' and entry < 'u323af') or
+                (entry > 'u31350' and entry < 'u323af') or
                 # Compatibility Ideographs.
                 (entry > 'uf900' and entry < 'ufaff') or
                 # Compatibility Ideographs Supplement.

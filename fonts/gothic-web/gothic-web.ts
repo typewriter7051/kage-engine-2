@@ -12,6 +12,7 @@ export class GothicWeb implements Font {
   lineCap: string;
   lineJoin: string;
   precision: number;
+  overrides;
 
   constructor(size) {
     /**
@@ -24,6 +25,12 @@ export class GothicWeb implements Font {
     this.lineCap = "square";
     this.lineJoin = "miter";
     this.precision = 2;
+    // @ts-expect-error
+    this.overrides = require("./overrides.json").overrides;
+  }
+
+  getOverrides() {
+    return this.overrides;
   }
 
   /**
@@ -75,8 +82,8 @@ export class GothicWeb implements Font {
         let txy: Point = [0, 0];
         PointOp.moveTowards(
           txy,
-          end_point,
           PathOp.getKthLastPoint(skeleton, 2), // Second last point.
+          end_point,
           this.kMage
         );
         PathOp.setLastPoint(skeleton, txy);
@@ -98,8 +105,8 @@ export class GothicWeb implements Font {
         let txy: Point = [0, 0];
         PointOp.moveTowards(
           txy,
-          end_point,
           PathOp.getKthLastPoint(skeleton, 2), // Second last point.
+          end_point,
           this.kMage
         );
         PathOp.setLastPoint(skeleton, txy);

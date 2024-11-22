@@ -22,10 +22,17 @@ Here is a list of classes and their roles:
 
 Here is the process:
 
+- Database is preprocessed depending on font and use case.
 - Kage is given an input character/composition and converts to IDS.
 - Kage uses Buhin to decompose and convert the IDS into stroke data, or generates the data if missing.
 - The font takes in the converted stroke data and creates paths.
 - Either the font or Kage converts the paths into an SVG.
+
+## Database Preprocessing
+
+When using the KAGE engine to generate glyphs on demand, it's unlikely that every single glyph needs to be loaded into memory. Depending on the regional variants and use cases we can reduce the database to include only what is necessary. Additionally there are some overrides that need to be made for each font, for example "氵" should have different stroke data for serif vs sans-serif fonts.
+
+There are two stages of database preprocessing. The first stage is to create a reduced database file, the second stage is to apply font-specific overrides at runtime.
 
 ## Converting to IDS
 
