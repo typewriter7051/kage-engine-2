@@ -1,4 +1,4 @@
-import { KAGEData, Path } from "./types";
+import { FontProperties, KAGEData, Path } from "./types";
 import { PathOp } from "./curve/path";
 
 /**
@@ -6,6 +6,15 @@ import { PathOp } from "./curve/path";
  * take KAGE stroke data and generate path/SVG data.
  */
 export abstract class Font {
+  /**
+   * Takes in an object containing properties to set for the font such as width,
+   * connection type, end type, and so on.
+   *
+   * This is intentionally separated from the constructor so that font
+   * properties may be changed without creating a new Font object.
+   */
+  abstract setProperties(properties: FontProperties): void;
+
   /**
    * Takes in an array of KAGE stroke data and returns an array of Path objects.
    */

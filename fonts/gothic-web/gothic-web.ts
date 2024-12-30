@@ -4,7 +4,7 @@ import { STROKETYPE, STARTTYPE, ENDTYPE } from "../../stroketype";
 //import { get_dir, moved_point, get_extended_dest } from "../../util";
 import { PathOp } from "../../curve/path";
 import { PointOp } from "../../point";
-import { Curve, KAGEData, KAGEString, Path, Point } from "../../types";
+import { Curve, FontProperties, KAGEData, KAGEString, Path, Point } from "../../types";
 
 export class GothicWeb implements Font {
   kWidth: number;
@@ -14,19 +14,34 @@ export class GothicWeb implements Font {
   precision: number;
   overrides;
 
-  constructor(size) {
+  constructor() {
+    // @ts-expect-error
+    this.overrides = require("./overrides.json").overrides;
+  }
+
+  setProperties(properties: FontProperties): void {
     /**
      * kWidth determines the stroke (line/curve) width.
      * kMage determines the turn size, used for hooks and bends.
      */
-    this.kWidth = size;
-    this.kMage = 10 + size * 0.5;
-
+    this.kWidth = 5;
     this.lineCap = "square";
     this.lineJoin = "miter";
     this.precision = 2;
-    // @ts-expect-error
-    this.overrides = require("./overrides.json").overrides;
+
+    if (properties["stroke-width"] != undefined)
+      this.kWidth = properties["stroke-width"];
+
+    if (properties["stroke-linecap"] != undefined)
+      this.lineCap = properties["stroke-linecap"];
+
+    if (properties["stroke-linejoin"] != undefined)
+      this.lineJoin = properties["stroke-linejoin"];
+
+    if (properties["precision"] != undefined)
+      this.precision = properties["precision"];
+
+    this.kMage = 10 + this.kWidth * 0.5;
   }
 
   getOverrides() {

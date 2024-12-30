@@ -5,13 +5,18 @@
 import { Kage } from "../../kage/kage";
 import { GothicWeb } from "../../fonts/gothic-web/gothic-web";
 
-let gothicWeb = new GothicWeb(5);
-gothicWeb.lineJoin = "round";
-gothicWeb.lineCap = "round";
+let gothicWeb = new GothicWeb();
+
+let gothicProperties = {
+  "stroke-width": 5,
+  "stroke-linecap": "round",
+  "stroke-linejoin": "round",
+  "precision": 2
+};
+gothicWeb.setProperties(gothicProperties);
 
 var kage = new Kage();
 kage.kFont = gothicWeb;
-kage.applyFontOverrides();
 
 kage.kBuhin.push("u6cf3-j", "99:0:0:3:0:156:200:u6c35-01:0:0:0$99:0:0:-10:0:202:200:u6c38-02:0:0:0");
 kage.kBuhin.push("u6c35-01", "2:7:8:33:20:59:28:69:41$2:7:8:12:68:38:75:49:89$2:7:8:14:133:54:142:50:184$2:32:7:44:150:49:139:86:58");
@@ -22,8 +27,9 @@ kage.kBuhin.push("u50c9-j", "2:0:7:102:16:69:64:12:87$2:7:0:99:19:133:60:179:77$
 kage.kBuhin.push("u6c38", "99:0:0:2:0:165:200:u99ac-01$99:0:0:74:0:194:200:u50c9-j");
 */
 
+kage.applyFontOverrides();
 let paths = kage.IDS2Paths("u6cf3-j");
 
-// @ts-expect-error
+// @ts-ignore
 console.log(kage.generateSVG(paths));
 

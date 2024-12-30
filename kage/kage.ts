@@ -24,8 +24,8 @@ export class Kage {
    */
   applyFontOverrides() {
     let overrides = this.kFont.getOverrides();
-    for (let key in Object.keys(overrides)) {
-      this.kBuhin[key] = overrides[key];
+    for (let key of Object.keys(overrides)) {
+      this.kBuhin.hash[key] = overrides[key];
     }
   }
 

@@ -1,4 +1,7 @@
 
+// Font properties such as width, etc...
+export type FontProperties = any;
+
 // KAGE data for a single stroke represented as a string e.g. "1:20:50:..."
 export type KAGEString = string;
 // KAGE data for a single stroke represented as an array e.g. [1, 20, 50, ...]

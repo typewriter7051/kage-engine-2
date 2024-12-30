@@ -1,4 +1,5 @@
 import csv
+import json
 import re
 import time
 
@@ -7,25 +8,19 @@ import time
 #===============================================================================
 
 """
-Path to your dump files.
+Path to your config file.
 """
-INPUT_FILE_PATH = './dump_newest_only.txt'
-OUTPUT_FILE_PATH = './dump_reduced.csv'
+CONFIG_FILE_PATH = './dbconfig1.json'
+with open(CONFIG_FILE_PATH, 'r') as file:
+    config = json.load(file)
 
-"""
-Only keep characters that do not reference other characters. This is used when
-other characters are going to be generated.
+if 'input' not in config:
+    raise KeyError('input must be defined!')
+if 'output' not in config:
+    raise KeyError('output must be defined!')
 
-Enabling this significantly reduces the number of entries saved.
-"""
-FUNDAMENTAL_ONLY = True
-
-"""
-Only keep the standard CJK Unified Ideographs.
-
-Enabling this significantly reduces the number of entries saved.
-"""
-CJK_ONLY = True
+INPUT_FILE_PATH = config['input']
+OUTPUT_FILE_PATH = config['output']
 
 """
 Only the stylized variants such as italic, full/half width, sans, etc...
@@ -33,28 +28,17 @@ Only the stylized variants such as italic, full/half width, sans, etc...
 KEEP_STYLIZED_VARIANTS = False
 
 """
-Regional variants such as Japan, Korea, Vietnam, etc...
-"""
-KEEP_REGIONAL_VARIANTS = False
-
-"""
 Removes entries that are just aliases for another character, and substitutes
 other characters that reference this accordingly.
 
 Enabling this significantly reduces the number of entries saved.
 """
-REMOVE_ALIASES = True
+REMOVE_ALIASES = False
 
 """
 Keep "-var-###" and "-itaiji-###" entries.
 """
 KEEP_CHARACTER_VARIANTS = False
-
-"""
-Keep the 'related character' entry, this is not needed if you are just
-generating characters.
-"""
-KEEP_RELATED_CHAR = False
 
 """
 Gets rid of character versions in character references. If this is enabled it is
@@ -168,12 +152,12 @@ print('Done! (' + str(round(time.time() - cur_time, 3)) + ') seconds')
 cur_time = time.time()
 print('Filtering entries...')
 
-for entry in entries.keys():
-    if FUNDAMENTAL_ONLY:
+for entry in entries:
+    if 'fundamental' in config['filters']:
         if re.search('99', entries[entry][1]):
             continue
 
-    if CJK_ONLY:
+    if 'cjk' in config['filters']:
                 # CJK Unified Ideographs.
         if not ((entry > 'u4e00' and entry < 'u9fff') or
                 # Extention A.
@@ -200,7 +184,11 @@ for entry in entries.keys():
         if re.search('(-var|-itaiji)', entry):
             continue
 
-    if not KEEP_REGIONAL_VARIANTS:
+    if 'region' in config:
+        """
+        Remove all regional variant characters (ending in -j, -g, ...), the
+        target regional variant will be included back later.
+        """
         if re.search('-[a-z]{1,2}$', entry):
             continue
 
@@ -209,6 +197,32 @@ for entry in entries.keys():
             continue
 
     keep.append(entry)
+
+#-------------------------------------------------------------------------------
+# Set regional variants in glyph inclusions.
+
+if 'region' in config:
+    for entry in keep:
+        strokes = entries[entry][1].split('$')
+
+        for s in range(len(strokes)):
+            tokens = strokes[s].split(':')
+
+            if tokens[0] == '99':
+                glyph = tokens[7]
+
+                if re.search('-[a-z]{1,2}$', glyph):
+                    """
+                    Regional variant found. Check if the target variant exists
+                    and change it to that.
+                    """
+                    new_glyph = glyph.split('-')[0] + '-' + config['region']
+
+                    if new_glyph in entries:
+                        tokens[7] = new_glyph
+
+            strokes[s] = ':'.join(tokens)
+        entries[entry][1] = '$'.join(strokes)
 
 #-------------------------------------------------------------------------------
 # Remove aliases if needed (pt 1).
@@ -256,7 +270,7 @@ if REMOVE_ALIASES:
     cur_time = time.time()
     print('Removing aliases (pt 2)...')
 
-    for entry in keep_deps.keys():
+    for entry in keep_deps:
         if entry in aliases:
             keep_deps[entry] = False
         else:
@@ -281,15 +295,18 @@ print('Writing to file...')
 with open(OUTPUT_FILE_PATH, 'w') as outfile:
     writer = csv.writer(outfile)
 
-    for entry in keep_deps.keys():
+    for entry in keep_deps:
         if keep_deps[entry] == False:
             continue
 
         data = entries[entry]
-        if (KEEP_RELATED_CHAR):
-            writer.writerow([entry, data[0], data[1]])
+        if 'related-char' in config:
+            if config['related-char'] == False:
+                writer.writerow([entry, data[1]])
+            else:
+                writer.writerow([entry, data[0], data[1]])
         else:
-            writer.writerow([entry, data[1]])
+            writer.writerow([entry, data[0], data[1]])
 
 print('Done! (' + str(round(time.time() - cur_time, 3)) + ' seconds)')
 

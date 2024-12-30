@@ -1,0 +1,32 @@
+{
+    "comments": [
+        "'input' denotes the file path to load the database from.",
+        "",
+        "'output' denotes the file path to save the new database in.",
+        "",
+        "'region' decides which regional variant of the character to keep.",
+        "A region set to 'g' will choose the 'char-g' variants if available.",
+        "",
+        "'related-char' decides whether to keep the related-char entry.",
+        "",
+        "'filters' is a list of conditions each entry has to meet in order to",
+        "be added to the new database. Dependencies of entries in the new",
+        "database will always be added. Here are some of the filter options:",
+        "   - 'fundamental': only keep characters that do not reference other",
+        "       characters. This is used when other characters are going to be",
+        "       generated.",
+        "   - 'cjk': Only keep the standard CJK Unified Ideographs. Enabling",
+        "       this significantly reduces the number of entries saved.",
+        "",
+        "'overrides' is a set of entries to manually add/change.",
+        "",
+        "Font-specific overrides will be applied at runtime."
+    ],
+    "input": "./dump_newest_only.txt",
+    "output": "./dump_reduced.csv",
+    "region": "g",
+    "related-char": false,
+    "filters": ["cjk"],
+    "overrides": {
+    }
+}
