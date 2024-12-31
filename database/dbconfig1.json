@@ -1,8 +1,13 @@
 {
     "comments": [
-        "'input' denotes the file path to load the database from.",
+        "'input' denotes the file path to load the database from. If the file",
+        "extention ends in '.pkl' then the format is assumed to be binary.",
+        "CSV files are also supported and otherwise the file is assumed to be",
+        "in the original dump_newest_only.txt format.",
         "",
-        "'output' denotes the file path to save the new database in.",
+        "'output' denotes the file path to save the new database in. Depending",
+        "on the extension specified the output can be saved as either a CSV or",
+        "pickle (binary) file for faster future reading.",
         "",
         "'region' decides which regional variant of the character to keep.",
         "A region set to 'g' will choose the 'char-g' variants if available.",
@@ -17,16 +22,22 @@
         "       generated.",
         "   - 'cjk': Only keep the standard CJK Unified Ideographs. Enabling",
         "       this significantly reduces the number of entries saved.",
+        "   - 'none': Keep nothing, overrides all other filters. This is used",
+        "       alongside 'keep-chars' to create an exclusive list.",
+        "",
+        "'keep-chars' is a list of extra characters (in IDS form) to manually",
+        "keep along with their dependenices.",
         "",
         "'overrides' is a set of entries to manually add/change.",
         "",
         "Font-specific overrides will be applied at runtime."
     ],
-    "input": "./dump_newest_only.txt",
+    "input": "./dump_newest_only.pkl",
     "output": "./dump_reduced.csv",
     "region": "g",
     "related-char": false,
-    "filters": ["cjk"],
+    "filters": ["cjk", "none"],
+    "keep-chars": ["u5f71"],
     "overrides": {
     }
 }

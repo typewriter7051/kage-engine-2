@@ -1,5 +1,6 @@
 import csv
 import json
+import pickle
 import re
 import time
 
@@ -123,27 +124,27 @@ def get_root(entry, aliases):
 print('Reading entries...')
 cur_time = time.time()
 
-"""
-First pass: simple entries that can be immediately removed without any
-sort of reworking required.
-"""
-with open(INPUT_FILE_PATH, 'r') as infile:
-    for i, line in enumerate(infile):
-        if i == 0 or i == 1:
-            continue
+if INPUT_FILE_PATH[-4:] == '.pkl':
+    with open(INPUT_FILE_PATH, 'rb') as infile:
+        entries = pickle.load(infile)
+else:
+    with open(INPUT_FILE_PATH, 'r') as infile:
+        for i, line in enumerate(infile):
+            if i == 0 or i == 1:
+                continue
 
-        """
-        Assuming the file format has not changed, tokens should be
-        ['name', '|', 'related char', '|', 'data']
-        """
-        tokens = line.split()
-        if len(tokens) != 5:
-            continue
+            """
+            Assuming the file format has not changed, tokens should be
+            ['name', '|', 'related char', '|', 'data']
+            """
+            tokens = line.split()
+            if len(tokens) != 5:
+                continue
 
-        if NEWEST_ONLY:
-            tokens[4] = re.sub('@\\d+', '', tokens[4])
+            if NEWEST_ONLY:
+                tokens[4] = re.sub('@\\d+', '', tokens[4])
 
-        entries[tokens[0]] = [tokens[2], tokens[4]]
+            entries[tokens[0]] = [tokens[2], tokens[4]]
 
 #-------------------------------------------------------------------------------
 # Filter entries.
@@ -152,57 +153,72 @@ print('Done! (' + str(round(time.time() - cur_time, 3)) + ') seconds')
 cur_time = time.time()
 print('Filtering entries...')
 
-for entry in entries:
-    if 'fundamental' in config['filters']:
-        if re.search('99', entries[entry][1]):
-            continue
+if 'filters' not in config:
+    keep = list(entries.keys())
+else:
+    for entry in entries:
+        if 'none' in config['filters']:
+            break
 
-    if 'cjk' in config['filters']:
-                # CJK Unified Ideographs.
-        if not ((entry > 'u4e00' and entry < 'u9fff') or
-                # Extention A.
-                (entry > 'u3400' and entry < 'u4dbf') or
-                # Extention B and so on.
-                (entry > 'u20000' and entry < 'u2a6df') or
-                (entry > 'u2a700' and entry < 'u2b73f') or
-                (entry > 'u2b740' and entry < 'u2b81f') or
-                (entry > 'u2b820' and entry < 'u2ceaf') or
-                (entry > 'u2ceb0' and entry < 'u2ebef') or
-                (entry > 'u30000' and entry < 'u3134f') or
-                # Extention H.
-                (entry > 'u31350' and entry < 'u323af') or
-                # Compatibility Ideographs.
-                (entry > 'uf900' and entry < 'ufaff') or
-                # Compatibility Ideographs Supplement.
-                (entry > 'u2f800' and entry < 'u2fa1f')):
-            continue
+        if 'fundamental' in config['filters']:
+            if re.search('99', entries[entry][1]):
+                continue
 
-        if re.search('-u', entry):
-            continue
+        if 'cjk' in config['filters']:
+                    # CJK Unified Ideographs.
+            if not ((entry > 'u4e00' and entry < 'u9fff') or
+                    # Extention A.
+                    (entry > 'u3400' and entry < 'u4dbf') or
+                    # Extention B and so on.
+                    (entry > 'u20000' and entry < 'u2a6df') or
+                    (entry > 'u2a700' and entry < 'u2b73f') or
+                    (entry > 'u2b740' and entry < 'u2b81f') or
+                    (entry > 'u2b820' and entry < 'u2ceaf') or
+                    (entry > 'u2ceb0' and entry < 'u2ebef') or
+                    (entry > 'u30000' and entry < 'u3134f') or
+                    # Extention H.
+                    (entry > 'u31350' and entry < 'u323af') or
+                    # Compatibility Ideographs.
+                    (entry > 'uf900' and entry < 'ufaff') or
+                    # Compatibility Ideographs Supplement.
+                    (entry > 'u2f800' and entry < 'u2fa1f')):
+                continue
 
-    if not KEEP_CHARACTER_VARIANTS:
-        if re.search('(-var|-itaiji)', entry):
-            continue
+            if re.search('-u', entry):
+                continue
 
-    if 'region' in config:
-        """
-        Remove all regional variant characters (ending in -j, -g, ...), the
-        target regional variant will be included back later.
-        """
-        if re.search('-[a-z]{1,2}$', entry):
-            continue
+        if not KEEP_CHARACTER_VARIANTS:
+            if re.search('(-var|-itaiji)', entry):
+                continue
 
-    if not KEEP_STYLIZED_VARIANTS:
-        if re.search('(italic|sans|width)', entry):
-            continue
+        if 'region' in config:
+            """
+            Remove all regional variant characters (ending in -j, -g, ...), the
+            target regional variant will be included back later.
+            """
+            if re.search('-[a-z]{1,2}$', entry):
+                continue
 
-    keep.append(entry)
+        if not KEEP_STYLIZED_VARIANTS:
+            if re.search('(italic|sans|width)', entry):
+                continue
+
+        keep.append(entry)
+
+if 'keep-chars' in config:
+    for entry in config['keep-chars']:
+        if entry in entries:
+            keep.append(entry)
 
 #-------------------------------------------------------------------------------
 # Set regional variants in glyph inclusions.
 
 if 'region' in config:
-    for entry in keep:
+    print('Done! (' + str(round(time.time() - cur_time, 3)) + ') seconds')
+    cur_time = time.time()
+    print('Setting region...')
+
+    for entry in entries:
         strokes = entries[entry][1].split('$')
 
         for s in range(len(strokes)):
@@ -293,20 +309,24 @@ cur_time = time.time()
 print('Writing to file...')
 
 with open(OUTPUT_FILE_PATH, 'w') as outfile:
-    writer = csv.writer(outfile)
+    if OUTPUT_FILE_PATH[-4:] == '.pkl':
+        with open(OUTPUT_FILE_PATH, 'wb') as outfile:
+            pickle.dump(entries, outfile)
+    else:
+        writer = csv.writer(outfile)
 
-    for entry in keep_deps:
-        if keep_deps[entry] == False:
-            continue
+        for entry in keep_deps:
+            if keep_deps[entry] == False:
+                continue
 
-        data = entries[entry]
-        if 'related-char' in config:
-            if config['related-char'] == False:
-                writer.writerow([entry, data[1]])
+            data = entries[entry]
+            if 'related-char' in config:
+                if config['related-char'] == False:
+                    writer.writerow([entry, data[1]])
+                else:
+                    writer.writerow([entry, data[0], data[1]])
             else:
                 writer.writerow([entry, data[0], data[1]])
-        else:
-            writer.writerow([entry, data[0], data[1]])
 
 print('Done! (' + str(round(time.time() - cur_time, 3)) + ' seconds)')
 
