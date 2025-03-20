@@ -2,8 +2,8 @@
 //
 // % node standalone.ts > result.svg (NodeJS)
 
-import { Kage } from "../../kage/kage";
-import { GothicWeb } from "../../fonts/gothic-web/gothic-web";
+import { Kage } from "../../src/kage/kage";
+import { GothicWeb } from "../../src/fonts/gothic-web/gothic-web";
 
 let gothicWeb = new GothicWeb();
 

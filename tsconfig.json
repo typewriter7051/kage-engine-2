@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "commonjs",
+    "lib": [
+      "esnext"
+    ],
+    "removeComments": true,
+    "sourceMap": true
+  },
+  "include": [
+    "src/**/*"
+  ]
+}

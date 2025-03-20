@@ -225,4 +225,16 @@ export class GothicWeb implements Font {
 
     return buffer;
   }
+
+  // @ts-expect-error
+  drawCanvas(paths: Path[], ctx: CanvasRenderingContext2D) {
+    for(let path of paths) {
+      ctx.lineWidth = this.kWidth;
+      ctx.lineCap = this.lineCap;
+      ctx.lineJoin = this.lineJoin;
+      // @ts-expect-error
+      var p = new Path2D(PathOp.toSVGSequence(path, this.precision));
+      ctx.stroke(p);
+    }
+  }
 }
